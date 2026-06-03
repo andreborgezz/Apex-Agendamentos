@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "apex-lojas",
+  "private_key_id": "21eb2c32db1349696e62469d041b34a1aed8882c",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCs1k4JfFqT632l\nInPBUHnCWleOf1hgTTVD9MWEQYj7f+Ir2QDnPysNzZzsEancvQQF9gseqrQVMv7b\nrqLftgQpO5fTO9RdYqnx5tQqxIDGEKS6M72QyImOIMRNh1njM0UHxuuCat80H+x8\nPrh/PVU42ej29eOJNyLW8qqdiffSpLhSjnrt4fHpYwl+VYvL61fXtVysVxcXpzim\nbfsBECdyGTWcKJZMTt7TBD+McEcUuZn+ALs+3EKa0sUcHNyRckf2bpqxlPe35HCN\navTBvzWXWWjOwXCLXZN50tm2eeLY8T4Qx0sI1rm+nhlvV3/H3nysYC6CNKVNj2Uq\nQPKi3wknAgMBAAECggEAKKxD8AKGFEI6Lqa1Y9wq0xxMd3mrU/pHWycaZh2//SNi\nl5v5FPIuERD+aSVc+le2vypgAob8WvLFu+/UX13ni8Z825Y8Sv+ha449BpV4kmOv\nSCxN42j1ye8XEwGTmx5hE8vxdx7sSMlsbu6Zn0PRLtBE/PzvX0aM2dWAZhNmMPj0\nMIJ2uupYU/D8EXZdkfuWvmtGaAcUxdt3617E0s8VOad2xQKtzYqgpeMtIwmhHpZ6\nj61rkd2liZdLMHKbitgMjBCd/jaUdrZsG6Pv4DuaJsxfZwxMqvrMJBQJp1EC9v4y\nmarkuwpr5GKD/qqOLseBI11lvlgdjG5tG+55Ud5xqQKBgQDh44AdpU02f16an0lF\nDubus51Z3cHCmS6jYymZsJSUX5HmTYavoDuiAS0fJWiA+A6kJq4Mg8kFaL0T7QH2\nS170uZQ+s0hUbMyuhakBexRjJsvsFPi3W+xxdZBvt12HOI0azLJb2vx6hqTjzsBF\n4HE7k4Hgik1fJ+Vdvae3OtijuQKBgQDD4GizfjplRsnt5787HxlMBIe+GSFUk/q/\nsVuQ3p1A6Twu9LUgPhlLCV4JGh9Ir3XmE+B8GUNnK78l3zEketFULpVSl7+u90kk\nr6gyTNNvB3aV260XLnixGEiG6ATGMV1/HpN++nnIQYT+IieEPvWK8uW0usNMFJ4G\n9BiI7UdD3wKBgF6EMLE23230MYOFLsVEjQBIC4j0rwRb0BXxghCawDCtJIE24ypN\nY2ZQE686mdWM9aNdw+ncopouzx6tRurlcp/3nr31ikg5FhPYPXUvKMKsExt/Uup1\n/iMjTAJSuUHBOdmC2QZyRL6H5Cql8fHLDdYdzHRFqkYsjV6B4tFaQBeRAoGALjBW\nwCy93G/q4fzJ7UkSEAjpcXw/jdAvStCpxOmZr1rQZEo0A9xg3n7g+8h7JAqsBIsf\nXmQers90DZwp3G5RukYZ1BYQj1OkndAGG4ZePUpHPmNE17iPoUMWpylDJvExGO6+\n3Sx3Vy+MCtlG9DpccF2CqTF5KBGcigs5VeCN84UCgYBUe9YXRntLhJ5i0WJ4f03q\nFYG6VmAsJUx8Z0H1+4lzoODHLH4ds2fggNyAgW8Ip++OEipOLD6vbA/twBiDNpix\n3BSMdlqFnLGLJX3lPEKYuu5Pq/vkAhzrMheO3CDee1vtej3XEvCPvYWYUh1MKI7Q\nWR3EKlPW0jk8d1YWCtGinA==\n-----END PRIVATE KEY-----\n",
+  "client_email": "apex-lojas@apex-lojas.iam.gserviceaccount.com",
+  "client_id": "105033250606859735611",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/apex-lojas%40apex-lojas.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
