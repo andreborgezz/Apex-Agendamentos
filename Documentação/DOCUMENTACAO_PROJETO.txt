@@ -1,0 +1,674 @@
+================================================================================
+  APEX AGENDAMENTOS — DOCUMENTAÇÃO COMPLETA DO PROJETO
+  Gerado em: 06/06/2026
+================================================================================
+
+ÍNDICE
+------
+1. Visão Geral do Produto
+2. Arquitetura Geral
+3. Estrutura de Pastas
+4. Banco de Dados (Supabase)
+5. Backend (Node.js + Express)
+6. Frontend (HTML + CSS + JS puro)
+7. Integrações Externas
+8. Fluxo de uso (Prestador e Cliente)
+9. Como rodar o projeto
+
+
+================================================================================
+1. VISÃO GERAL DO PRODUTO
+================================================================================
+
+Apex Agendamentos é um SaaS (Software as a Service) de gestão de agendamentos
+voltado para prestadores de serviços de alto valor, como clínicas, estúdios e
+profissionais autônomos.
+
+O sistema possui DOIS públicos principais:
+
+  → PRESTADOR (admin do painel):
+    Acessa o painel interno (dashboard, agenda, clientes, serviços, configurações).
+    Gerencia todos os agendamentos e configurações do seu estabelecimento.
+
+  → CLIENTE FINAL:
+    Acessa uma página pública de agendamento gerada pelo sistema.
+    Escolhe o serviço, a data e o horário disponível e confirma o agendamento.
+
+Tecnologias principais:
+  - Banco de dados   : Supabase (PostgreSQL na nuvem)
+  - Backend (API)    : Node.js + Express.js (v5)
+  - Frontend (Painel): HTML5 + CSS3 + JavaScript ES2022 puro (sem frameworks)
+  - Calendário       : Google Calendar API (integração via Service Account)
+
+
+================================================================================
+2. ARQUITETURA GERAL
+================================================================================
+
+  ┌──────────────────────────────────────────────────────────────┐
+  │                         CLIENTE FINAL                        │
+  │             (Acessa a página pública de agendamento)         │
+  └─────────────────────────┬────────────────────────────────────┘
+                            │  HTTP / fetch
+                            ▼
+  ┌──────────────────────────────────────────────────────────────┐
+  │                  FRONTEND (HTML/CSS/JS)                      │
+  │  pages/: dashboard, agenda, clientes, servicos, config...    │
+  │  components/: supabase.js, api.js, sidebar.js, toast.js...   │
+  └────────────┬────────────────────────┬────────────────────────┘
+               │                        │
+               │ fetch (REST API)        │ Supabase JS Client (direto)
+               ▼                        ▼
+  ┌────────────────────────┐   ┌────────────────────────────────┐
+  │  BACKEND Express.js    │   │       SUPABASE (nuvem)         │
+  │  Porta: 3333           │   │  PostgreSQL gerenciado         │
+  │  routes/               │   │  URL: skczsvooozoy...          │
+  │  services/             │   │                                │
+  └────────────┬───────────┘   └────────────────────────────────┘
+               │
+               │ googleapis (Service Account)
+               ▼
+  ┌────────────────────────┐
+  │   GOOGLE CALENDAR API  │
+  │  Lê eventos ocupados   │
+  │  Cria novos eventos    │
+  └────────────────────────┘
+
+Observação importante sobre arquitetura atual:
+  - O frontend se comunica TANTO com o backend Express (via api.js)
+    QUANTO diretamente com o Supabase (via supabase.js do CDN).
+  - O backend Express é necessário principalmente para a lógica
+    de disponibilidade (cruzamento com Google Calendar) e operações
+    que exigem a Service Account do Google.
+
+
+================================================================================
+3. ESTRUTURA DE PASTAS
+================================================================================
+
+Apex Agendamentos/
+├── Documentação/
+│   └── DOCUMENTACAO_PROJETO.txt   ← este arquivo
+│
+├── Sistema/
+│   ├── backend/                   ← API REST (Node.js + Express)
+│   │   ├── server.js              ← Ponto de entrada da API
+│   │   ├── database.js            ← Instância do Supabase (backend)
+│   │   ├── .env                   ← Variáveis de ambiente (NÃO versionar)
+│   │   ├── google-key.json        ← Chave da Service Account Google (NÃO versionar)
+│   │   ├── package.json           ← Dependências do backend
+│   │   ├── routes/
+│   │   │   ├── usuarios.js        ← CRUD de usuários + login
+│   │   │   ├── sites.js           ← CRUD de sites/estabelecimentos
+│   │   │   ├── servicos.js        ← CRUD de serviços
+│   │   │   ├── clientes.js        ← CRUD de clientes do site
+│   │   │   ├── agendamentos.js    ← Disponibilidade + Confirmação
+│   │   │   └── tipos.js           ← CRUD de tipos de estabelecimento
+│   │   └── services/
+│   │       └── googleCalendar.js  ← Integração Google Calendar API
+│   │
+│   ├── frontend/                  ← Painel administrativo e público
+│   │   ├── index.html             ← Página de login (entrada do sistema)
+│   │   ├── index.js               ← Lógica da tela de login
+│   │   ├── app.js                 ← App principal (complementar)
+│   │   ├── style.css              ← Estilos globais (versão antiga)
+│   │   ├── styles.css             ← Estilos globais (versão atual com tokens)
+│   │   ├── components/
+│   │   │   ├── supabase.js        ← Instância única do Supabase (CDN)
+│   │   │   ├── api.js             ← Centralizador de chamadas ao backend
+│   │   │   ├── sidebar.js         ← Sidebar injetada via JS em todas as páginas
+│   │   │   ├── modal.js           ← Sistema de modais
+│   │   │   ├── toast.js           ← Sistema de notificações toast
+│   │   │   └── skeleton.js        ← Skeletons de loading
+│   │   └── pages/
+│   │       ├── dashboard/
+│   │       │   ├── dashboard.html ← Visão geral do negócio
+│   │       │   └── dashboard.js   ← Lógica do dashboard
+│   │       ├── agenda/
+│   │       │   ├── agenda.html    ← Calendário e lista de agendamentos
+│   │       │   └── agenda.js      ← Lógica da agenda
+│   │       ├── clientes/
+│   │       │   ├── clientes.html  ← Listagem de clientes
+│   │       │   └── (clientes.js)  ← Lógica de clientes
+│   │       ├── servicos/
+│   │       │   ├── servicos.html  ← Listagem e cadastro de serviços
+│   │       │   └── (servicos.js)  ← Lógica de serviços
+│   │       └── configuracoes/
+│   │           ├── configuracoes.html ← Config do estabelecimento
+│   │           └── (configuracoes.js) ← Lógica de configurações
+│   │
+│   └── db/
+│       ├── script.sql             ← DDL — criação de todas as tabelas
+│       └── inserts.sql            ← DML — dados iniciais (tipos de estabelecimento)
+│
+└── skills/
+    └── skill-frontend.md          ← Regras de desenvolvimento do frontend
+
+
+================================================================================
+4. BANCO DE DADOS (Supabase / PostgreSQL)
+================================================================================
+
+Provedor: Supabase (PostgreSQL gerenciado na nuvem)
+URL:       https://skczsvooozoyxrazcvqk.supabase.co
+Script:    Sistema/db/script.sql
+
+TABELAS
+-------
+
+4.1. usuarios
+  Armazena os donos de estabelecimento (usuários do painel SaaS).
+
+  Colunas:
+    id_usuario      INT  (PK, auto-incremento)
+    nome_usuario    VARCHAR(255)  NOT NULL
+    email_usuario   VARCHAR(255)  NOT NULL UNIQUE
+    senha_usuario   VARCHAR(255)  NOT NULL  [⚠ sem criptografia ainda — usar bcrypt futuramente]
+    cnpj            VARCHAR(20)
+
+  Relacionamentos:
+    → Possui N sites (um usuário pode ter múltiplos estabelecimentos)
+
+
+4.2. tipo_estabelecimento
+  Catálogo de nichos de mercado para classificar os sites.
+
+  Colunas:
+    id_tipo    INT  (PK, auto-incremento)
+    nome_tipo  VARCHAR(100)  NOT NULL UNIQUE
+
+  Dados iniciais (inserts.sql):
+    'loja', 'salao', 'clinica'
+
+  Relacionamentos:
+    → Referenciado por site (1 tipo → N sites)
+
+
+4.3. site
+  Representa o estabelecimento do prestador. Cada site tem uma URL pública
+  de agendamento e um calendário do Google vinculado.
+
+  Colunas:
+    id_site        INT  (PK, auto-incremento)
+    id_usuario     INT  FK → usuarios(id_usuario)  ON DELETE CASCADE
+    id_tipo        INT  FK → tipo_estabelecimento(id_tipo)  ON DELETE RESTRICT
+    nome_site      VARCHAR(255)  NOT NULL
+    link           VARCHAR(255)  NOT NULL UNIQUE   ← slug da URL pública
+    cor_site       VARCHAR(100)                    ← cor primária da página pública
+    logo_loja      VARCHAR(255)                    ← URL da imagem do logo
+    layout         VARCHAR(50)                     ← tipo de layout visual
+    calendario_id  VARCHAR(255)  NOT NULL           ← ID do Google Calendar vinculado
+
+  Relacionamentos:
+    → Pertence a 1 usuario
+    → Pertence a 1 tipo_estabelecimento
+    → Possui N clientes_do_site
+    → Possui N servicos
+    → Possui N regras_de_horarios
+    → Possui N agendamentos_confirmados
+
+
+4.4. clientes_do_site
+  Clientes cadastrados ao fazer um agendamento na página pública.
+
+  Colunas:
+    id_cliente        INT  (PK, auto-incremento)
+    id_site           INT  FK → site(id_site)  ON DELETE CASCADE
+    nome_cliente      VARCHAR(255)  NOT NULL
+    email_cliente     VARCHAR(255)  NOT NULL UNIQUE
+    telefone_cliente  VARCHAR(20)
+
+  Relacionamentos:
+    → Pertence a 1 site
+    → Possui N agendamentos_confirmados
+
+
+4.5. servicos
+  Catálogo de serviços oferecidos por cada estabelecimento.
+
+  Colunas:
+    id_servico    INT  (PK, auto-incremento)
+    id_site       INT  FK → site(id_site)  ON DELETE CASCADE
+    nome_servico  VARCHAR(255)  NOT NULL
+    descricao     VARCHAR(500)
+    duracao       VARCHAR(50)   ← duração em minutos (ex: "30", "60")
+    preco         DECIMAL(10,2)
+
+  Relacionamentos:
+    → Pertence a 1 site
+    → Referenciado por agendamentos_confirmados
+
+
+4.6. regras_de_horarios
+  Define os horários de funcionamento por dia da semana para cada site.
+  É usado para calcular os slots disponíveis de agendamento.
+
+  Colunas:
+    id          INT  (PK, auto-incremento)
+    id_site     INT  FK → site(id_site)  ON DELETE CASCADE
+    dia_semana  INT  CHECK (0 a 6)  ← 0 = Domingo, 6 = Sábado
+    abertura    TIME  NOT NULL       ← ex: '08:00'
+    fechamento  TIME  NOT NULL       ← ex: '18:00'
+    duracao     VARCHAR(50)  NOT NULL ← duração padrão dos slots em minutos
+
+  Relacionamentos:
+    → Pertence a 1 site
+
+
+4.7. agendamentos_confirmados
+  Agendamentos efetivados pelos clientes. Cada registro reflete um evento
+  criado também no Google Calendar.
+
+  Colunas:
+    id          INT  (PK, auto-incremento)
+    id_site     INT  FK → site(id_site)  ON DELETE CASCADE
+    id_cliente  INT  FK → clientes_do_site(id_cliente)  ON DELETE CASCADE
+    id_servico  INT  FK → servicos(id_servico)  ON DELETE SET NULL
+    data_hora   TIMESTAMP WITH TIME ZONE  NOT NULL
+
+  Relacionamentos:
+    → Pertence a 1 site
+    → Pertence a 1 cliente
+    → Vinculado a 1 serviço
+
+DIAGRAMA DE RELACIONAMENTO (simplificado):
+  usuarios (1) ──→ (N) site
+  tipo_estabelecimento (1) ──→ (N) site
+  site (1) ──→ (N) clientes_do_site
+  site (1) ──→ (N) servicos
+  site (1) ──→ (N) regras_de_horarios
+  site (1) ──→ (N) agendamentos_confirmados
+  clientes_do_site (1) ──→ (N) agendamentos_confirmados
+  servicos (1) ──→ (N) agendamentos_confirmados
+
+
+================================================================================
+5. BACKEND (Node.js + Express.js)
+================================================================================
+
+Localização:  Sistema/backend/
+Porta padrão: 3333
+Arquivo de entrada: server.js
+Tipo de módulo: ESM (type: "module" no package.json)
+
+DEPENDÊNCIAS (package.json):
+  @supabase/supabase-js  ^2.107.0  ← cliente Supabase
+  cors                   ^2.8.6    ← permite requisições cross-origin
+  dotenv                 ^17.4.2   ← carrega variáveis de ambiente
+  express                ^5.2.1    ← framework HTTP
+  googleapis             ^173.0.0  ← integração Google Calendar
+
+VARIÁVEIS DE AMBIENTE (.env):
+  SUPABASE_URL      = URL do projeto Supabase
+  SUPABASE_ANON_KEY = Chave anônima do Supabase
+  PORT              = (opcional) porta da API, padrão 3333
+
+CORS configurado para:
+  http://localhost:5173
+  http://127.0.0.1:5173
+  Métodos: GET, POST, PUT, DELETE
+
+--------------------------------------------------------------------------------
+ROTAS DA API
+--------------------------------------------------------------------------------
+
+BASE URL: http://localhost:3333
+
+── /usuarios ──────────────────────────────────────────────────────────────────
+
+  POST   /usuarios/registrar
+    Cadastra um novo usuário (dono do estabelecimento).
+    Body: { nome_usuario, email_usuario, senha_usuario, cnpj }
+    Retorno: dados do usuário criado (201)
+
+  POST   /usuarios/login
+    Autentica o prestador e retorna os dados do usuário + site vinculado.
+    Body: { email_usuario, senha_usuario }
+    Retorno: { usuario: {...}, site: {...} | null }
+    ⚠ Senha comparada em texto plano — implementar bcrypt no futuro.
+
+  GET    /usuarios/:id
+    Busca o perfil de um usuário pelo ID.
+    Retorno: { id_usuario, nome_usuario, email_usuario, cnpj }
+
+  PUT    /usuarios/:id
+    Atualiza os dados do perfil de um usuário.
+    Body: campos a atualizar
+    Retorno: dados atualizados
+
+── /site ───────────────────────────────────────────────────────────────────────
+
+  POST   /site/cadastrar
+    Cadastra um novo site/estabelecimento.
+    Body: { id_usuario, id_tipo, nome_site, link, cor_site, logo_loja, layout, calendario_id }
+    Retorno: dados do site criado (201)
+
+  GET    /site/:link
+    Busca os dados de um site pelo slug (link único).
+    Usado pela página pública de agendamento.
+    Retorno: todos os dados do site
+
+  PUT    /site/atualizar/:id_site
+    Atualiza configurações de um site (cor, logo, etc).
+    Body: campos a atualizar
+    Retorno: dados atualizados
+
+  DELETE /site/remover/:id_site
+    Remove um site (e em cascata: clientes, serviços, agendamentos).
+    Retorno: { mensagem: 'Site removido com sucesso' }
+
+── /servicos ───────────────────────────────────────────────────────────────────
+
+  POST   /servicos
+    Cadastra um novo serviço para um site.
+    Body: { id_site, nome_servico, descricao, duracao, preco }
+    Retorno: serviço criado (201)
+
+  GET    /servicos/site/:id_site
+    Lista todos os serviços de um estabelecimento.
+    Retorno: array de serviços
+
+  PUT    /servicos/:id_servico
+    Atualiza um serviço (preço, duração, etc).
+    Body: campos a atualizar
+    Retorno: dados atualizados
+
+  DELETE /servicos/:id_servico
+    Remove um serviço.
+    Retorno: { mensagem: 'serviço removido com sucesso' }
+
+── /agendamentos ────────────────────────────────────────────────────────────────
+
+  GET    /agendamentos/disponibilidade?id_site=X&data=YYYY-MM-DD&id_servico=Y
+    Retorna os horários disponíveis para um dia específico.
+    Lógica:
+      1. Busca as regras de horário do site para o dia da semana solicitado
+      2. Busca a duração do serviço selecionado
+      3. Consulta o Google Calendar pelo calendário do site para ver eventos ocupados
+      4. Gera slots de tempo com base na abertura/fechamento e duração
+      5. Filtra slots que conflitam com eventos do Google Calendar
+      6. Retorna apenas os horários livres
+    Retorno: { data, horarios_disponiveis: ['08:00', '08:30', ...] }
+    Retorno (fechado): 404 { mensagem: 'Estabelecimento fechado neste dia.' }
+
+  POST   /agendamentos/confirmar
+    Confirma um agendamento: salva no banco E cria evento no Google Calendar.
+    Body: { id_site, id_cliente, id_servico, data_hora }
+    Lógica:
+      1. Busca dados do site, serviço e cliente
+      2. Calcula horário de fim com base na duração do serviço
+      3. Cria evento no Google Calendar do estabelecimento
+      4. Salva o agendamento no Supabase com o ID do evento Google
+    Retorno: { mensagem, detalhes: { ...agendamento } } (201)
+
+── /clientes ────────────────────────────────────────────────────────────────────
+  [NOTA: Rota existente nos arquivos de routes mas NÃO registrada no server.js ainda]
+
+  POST   /clientes/registrar
+    Cadastra um novo cliente (captado na página pública).
+    Body: { id_site, nome_cliente, email_cliente, telefone_cliente }
+    Retorno: cliente criado (201)
+
+  GET    /clientes/site/:id_site
+    Lista todos os clientes de um estabelecimento.
+    Retorno: array de clientes
+
+  GET    /clientes/busca?email=X
+    Busca um cliente pelo e-mail (evita duplicatas).
+    Retorno: dados do cliente
+
+  DELETE /clientes/:id
+    Remove um cliente (LGPD).
+    Retorno: { mensagem: 'cliente removido com sucesso' }
+
+── /tipos ────────────────────────────────────────────────────────────────────
+  [NOTA: Rota existente nos arquivos de routes mas NÃO registrada no server.js ainda]
+
+  POST   /tipos/cadastrar
+    Adiciona um novo tipo de estabelecimento.
+    Body: { nome_tipo }
+
+  GET    /tipos
+    Lista todos os tipos de estabelecimento em ordem alfabética.
+
+  PUT    /tipos/atualizar/:id
+    Edita o nome de um tipo.
+    Body: { nome_tipo }
+
+  DELETE /tipos/remover/:id
+    Remove um tipo.
+
+--------------------------------------------------------------------------------
+SERVICES
+--------------------------------------------------------------------------------
+
+services/googleCalendar.js
+  Autenticação: Google Service Account (arquivo google-key.json)
+  Escopo: https://www.googleapis.com/auth/calendar
+
+  listarEventosOcupados(calendarId, inicio, fim)
+    → Busca todos os eventos no Google Calendar entre inicio e fim (ISO 8601)
+    → Retorna array de eventos do Google
+
+  criarEventoNoGoogle(calendarId, resumo, descricao, inicio, fim)
+    → Cria um novo evento no Google Calendar
+    → Retorna o ID do evento criado (salvo depois no Supabase)
+
+
+================================================================================
+6. FRONTEND (HTML + CSS + JS puro)
+================================================================================
+
+Localização:    Sistema/frontend/
+Entrada:        index.html (tela de login)
+Stack:          HTML5 + CSS3 + JavaScript ES2022 ESM (sem frameworks, sem bundler)
+
+CDNs utilizados (ordem de carregamento):
+  anime.js 3.2.1   → cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js
+  Supabase v2      → cdn.jsdelivr.net/npm/@supabase/supabase-js@2
+  Tabler Icons     → cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css
+  Google Fonts     → DM Sans (300/400/500/600) + JetBrains Mono (400/500)
+
+TOKENS DE DESIGN (styles.css — variáveis CSS globais):
+  --apex-bg              #0C0C0E    (fundo principal)
+  --apex-surface         #111114    (superfícies de cards)
+  --apex-surface-alt     #1A1A1F    (superfícies alternativas)
+  --apex-surface-hover   #22222A    (hover de superfícies)
+  --apex-border          rgba(255,255,255,0.07)
+  --apex-border-focus    rgba(255,255,255,0.18)
+  --apex-text-primary    #F0EFE8
+  --apex-text-secondary  #8A8A96
+  --apex-text-muted      #52525C
+  --apex-accent          #5C6AC4    (cor de destaque/ação)
+  --apex-accent-hover    #6B7AD4
+  --apex-accent-subtle   rgba(92,106,196,0.12)
+  --apex-success         #2ECC8F
+  --apex-warning         #F0A050
+  --apex-danger          #E05252
+  --apex-info            #5096E0
+  --r-sm                 6px
+  --r-md                 10px
+  --r-lg                 16px
+  --r-xl                 24px
+  --font-display         'DM Sans', sans-serif
+  --font-mono            'JetBrains Mono', monospace
+
+ANIMAÇÕES (anime.js — springs fixos):
+  SPRING_ENTRADA  → easing: spring(1,80,12,0),  duration: 600  (cards, listas)
+  SPRING_MODAL    → easing: spring(1,60,10,0),  duration: 700  (modais, drawers)
+  SPRING_MICRO    → easing: spring(1,200,18,0), duration: 300  (hover, clique)
+  SPRING_NAV      → easing: spring(1,90,14,0),  duration: 500  (calendário, navegação)
+
+COMPONENTES GLOBAIS (components/):
+
+  supabase.js
+    Instância única do Supabase para o frontend.
+    SUPABASE_URL:  https://skczsvooozoyxrazcvqk.supabase.co
+    Exporta:       { supabase }
+
+  api.js
+    Centralizador de chamadas ao backend Express.
+    Base URL padrão: http://localhost:3000 (configurável via localStorage: apex_api_url)
+    Exporta:
+      API.login(email, senha)              → POST /usuarios/login
+      API.logout()                         → limpa sessão localStorage
+      API.registrar(payload)               → POST /usuarios/registrar
+      API.getUsuario(id)                   → GET  /usuarios/:id
+      API.getSite(link)                    → GET  /site/:link
+      API.cadastrarSite(payload)           → POST /site/cadastrar
+      API.atualizarSite(id_site, payload)  → PUT  /site/atualizar/:id_site
+      API.getServicos(id_site)             → GET  /servicos/site/:id_site
+      API.criarServico(payload)            → POST /servicos
+      API.deletarServico(id_servico)       → DELETE /servicos/:id_servico
+      API.getDisponibilidade(id, data, id_servico) → GET /agendamentos/disponibilidade
+      API.confirmarAgendamento(payload)    → POST /agendamentos/confirmar
+
+      Session.salvar(dados)  → salva sessão no localStorage (chave: apex_session)
+      Session.ler()          → lê sessão do localStorage
+      Session.limpar()       → remove sessão
+      Session.existe()       → boolean
+
+  sidebar.js
+    Injetada via JavaScript em todas as páginas do painel.
+    Contém navegação entre: Dashboard, Agenda, Clientes, Serviços, Configurações.
+
+  modal.js
+    Sistema de modais reutilizável.
+
+  toast.js
+    Sistema de notificações toast (feedback de ações ao usuário).
+    NUNCA usar alert() — sempre usar toast.
+
+  skeleton.js
+    Skeletons de loading com dimensões exatas dos componentes finais.
+    Evita layout shift durante carregamento de dados.
+
+PÁGINAS DO PAINEL ADMINISTRATIVO:
+
+  index.html / index.js
+    Tela de login do prestador.
+    Autentica via API.login() → armazena sessão → redireciona ao dashboard.
+
+  pages/dashboard/dashboard.html + dashboard.js
+    Visão geral do negócio: métricas, próximos agendamentos, resumo.
+
+  pages/agenda/agenda.html + agenda.js
+    Calendário completo com todos os agendamentos do estabelecimento.
+    Permite visualização por dia, semana ou mês.
+
+  pages/clientes/clientes.html
+    Listagem de todos os clientes cadastrados pelo site público.
+
+  pages/servicos/servicos.html
+    Listagem, cadastro, edição e remoção de serviços oferecidos.
+
+  pages/configuracoes/configuracoes.html
+    Configurações do estabelecimento: nome, cor, logo, horários de funcionamento.
+
+PADRÕES OBRIGATÓRIOS:
+  - Toda mutação de dado usa Optimistic Update:
+      1. Atualiza a UI imediatamente
+      2. Faz a chamada à API/Supabase
+      3. Em caso de erro: desfaz a UI + exibe toast de erro
+  - Formulários críticos: auto-save parcial no localStorage a cada input
+  - Loading: sempre com skeleton (nunca spinner genérico)
+  - Erros: sempre via toast.js (nunca alert() ou console.log visível ao usuário)
+  - Responsivo: mobile-first, breakpoint único em 768px
+
+
+================================================================================
+7. INTEGRAÇÕES EXTERNAS
+================================================================================
+
+7.1. SUPABASE
+  Tipo:    PostgreSQL gerenciado (nuvem)
+  URL:     https://skczsvooozoyxrazcvqk.supabase.co
+  Acesso:  Chave anônima (frontend) + chave de serviço (backend via .env)
+  Uso:     Todas as operações CRUD do banco de dados
+
+7.2. GOOGLE CALENDAR API
+  Tipo:        REST API (via googleapis SDK)
+  Auth:        Service Account (arquivo google-key.json no backend)
+  Escopo:      calendar (leitura e escrita)
+  Uso:
+    - Ler eventos ocupados de um calendário (para calcular disponibilidade)
+    - Criar eventos novos (ao confirmar agendamento)
+  Cada site tem seu próprio calendario_id vinculado.
+  O prestador precisa compartilhar o Google Calendar com a Service Account.
+
+
+================================================================================
+8. FLUXO DE USO
+================================================================================
+
+FLUXO DO PRESTADOR (configuração inicial):
+  1. Acessa index.html → faz login com email/senha
+  2. É redirecionado ao dashboard
+  3. Em Configurações: configura nome, cor, logo, horários de funcionamento
+  4. Em Serviços: cadastra os serviços oferecidos (nome, duração, preço)
+  5. Recebe o link público do site para compartilhar com clientes
+
+FLUXO DO CLIENTE FINAL (agendamento):
+  1. Acessa a URL pública do estabelecimento (ex: /agendamento?link=meu-salao)
+  2. Visualiza os serviços disponíveis e escolhe um
+  3. Escolhe a data no calendário
+  4. Visualiza os horários disponíveis (calculados em tempo real pelo backend)
+  5. Escolhe o horário e preenche nome/email/telefone
+  6. Confirma → sistema salva no Supabase + cria evento no Google Calendar
+  7. Recebe confirmação visual do agendamento
+
+FLUXO TÉCNICO DA DISPONIBILIDADE:
+  GET /agendamentos/disponibilidade?id_site=1&data=2026-06-10&id_servico=2
+
+  Backend:
+  ① Busca regras_de_horarios para id_site + dia_semana da data solicitada
+  ② Se não há regras → retorna 404 (fechado no dia)
+  ③ Busca duração do serviço em servicos
+  ④ Busca o calendario_id do site em site
+  ⑤ Chama Google Calendar API → lista eventos entre abertura e fechamento
+  ⑥ Gera todos os slots possíveis (abertura até fechamento, step = duração)
+  ⑦ Filtra slots que se sobrepõem a eventos Google Calendar
+  ⑧ Retorna horarios_disponiveis: ['08:00', '08:30', '09:30', ...]
+
+
+================================================================================
+9. COMO RODAR O PROJETO
+================================================================================
+
+PRÉ-REQUISITOS:
+  - Node.js v18+
+  - Conta Supabase com as tabelas criadas (rodar db/script.sql)
+  - Google Cloud: projeto com Calendar API habilitada + Service Account
+  - Arquivo google-key.json gerado e salvo em Sistema/backend/
+  - Google Calendar compartilhado com o e-mail da Service Account
+
+CONFIGURAR O BACKEND:
+  1. cd "Sistema/backend"
+  2. npm install
+  3. Criar o arquivo .env com:
+       SUPABASE_URL=sua_url_do_supabase
+       SUPABASE_ANON_KEY=sua_chave_anonima
+       PORT=3333
+  4. node server.js
+     (ou: node --watch server.js para hot-reload)
+  → API disponível em http://localhost:3333
+
+CONFIGURAR O FRONTEND:
+  - Não há bundler nem build step.
+  - Abrir os arquivos HTML diretamente em um servidor HTTP local.
+  - Recomendado: extensão "Live Server" do VS Code
+  - Acessar: http://127.0.0.1:5500/Sistema/frontend/index.html
+  - OU configurar o Live Preview para servir a partir de Sistema/frontend/
+
+  IMPORTANTE: O CORS do backend está configurado para:
+    http://localhost:5173 e http://127.0.0.1:5173
+  Se usar outra porta (ex: 5500), adicionar ao array origin no server.js.
+
+BANCO DE DADOS (primeira execução):
+  1. Acessar o Supabase → SQL Editor
+  2. Executar db/script.sql (cria todas as tabelas)
+  3. Executar db/inserts.sql (popula tipos de estabelecimento)
+
+================================================================================
+  FIM DO DOCUMENTO
+================================================================================

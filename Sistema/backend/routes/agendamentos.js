@@ -1,7 +1,6 @@
 // routes/agendamentos.js
 import express from 'express'
 import { supabase } from '../database.js'
-import { listarEventosOcupados, criarEventoNoGoogle } from '../services/googleCalendar.js'
 
 const router = express.Router()
 
@@ -18,16 +17,15 @@ const paraTexto = (minutos) => {
     return `${h}:${m}`;
 };
 
-// 1. ROTA DE DISPONIBILIDADE (Busca os horários livres cruzando Banco + Google)
+// 1. ROTA DE DISPONIBILIDADE (Busca os horários livres cruzando Banco)
 router.get('/disponibilidade', async (req, res) => {
     const { id_site, data, id_servico } = req.query
 
     try {
-        // Busca os dados do site para pegar o calendário do google
-        const { data: site } = await supabase.from('site').select('calendario_id').eq('id_site', id_site).single();
-
         // Busca as regras de funcionamento
-        const diaSemana = new Date(data).getUTCDay();
+        const dataObj = new Date(data);
+        const diaSemana = dataObj.getUTCDay();
+        
         const { data: regras, error: erroRegras } = await supabase
             .from('regras_de_horarios')
             .select('*')
@@ -41,12 +39,28 @@ router.get('/disponibilidade', async (req, res) => {
 
         // Busca a duração do serviço
         const { data: servico } = await supabase.from('servicos').select('duracao').eq('id_servico', id_servico).single();
-        const duracao = servico?.duracao || regras.duracao;
+        const duracaoStr = servico?.duracao || regras.duracao;
+        const duracao = parseInt(duracaoStr, 10);
 
-        // Busca eventos ocupados no google calendar
-        const inicioBusca = `${data}T${regras.abertura}:00Z`;
-        const fimBusca = `${data}T${regras.fechamento}:00Z`;
-        const ocupados = await listarEventosOcupados(site.calendario_id, inicioBusca, fimBusca);
+        // Busca eventos ocupados apenas no banco
+        const inicioDia = `${data}T00:00:00.000Z`;
+        const fimDia = `${data}T23:59:59.999Z`;
+
+        const { data: agendamentos, error: errAgendamentos } = await supabase
+            .from('agendamentos_confirmados')
+            .select('data_hora, servicos(duracao)')
+            .eq('id_site', id_site)
+            .gte('data_hora', inicioDia)
+            .lte('data_hora', fimDia);
+
+        if (errAgendamentos) throw errAgendamentos;
+
+        const ocupados = agendamentos.map(ag => {
+            const inicio = new Date(ag.data_hora).getTime();
+            const dur = parseInt(ag.servicos?.duracao || '30', 10);
+            const fim = inicio + (dur * 60000);
+            return { inicio, fim };
+        });
 
         // Lógica de geração e filtragem de slots
         let slotsLivres = [];
@@ -57,14 +71,12 @@ router.get('/disponibilidade', async (req, res) => {
             const horarioInicio = paraTexto(atual);
             const isoInicio = `${data}T${horarioInicio}:00Z`;
             
-            // Verifica se este slot bate com algum evento do google
+            const slotInicio = new Date(isoInicio).getTime();
+            const slotFim = slotInicio + (duracao * 60000);
+            
+            // Verifica se este slot bate com algum evento no banco
             const estaOcupado = ocupados.some(evento => {
-                const evInicio = new Date(evento.start.dateTime || evento.start.date).getTime();
-                const evFim = new Date(evento.end.dateTime || evento.end.date).getTime();
-                const slotInicio = new Date(isoInicio).getTime();
-                const slotFim = slotInicio + (duracao * 60000);
-
-                return (slotInicio < evFim && slotFim > evInicio);
+                return (slotInicio < evento.fim && slotFim > evento.inicio);
             });
 
             if (!estaOcupado) {
@@ -79,35 +91,17 @@ router.get('/disponibilidade', async (req, res) => {
         });
 
     } catch (err) {
+        console.error(err);
         res.status(500).json({ mensagem: 'Erro ao calcular disponibilidade.' });
     }
 });
 
-// 2. ROTA DE CONFIRMAÇÃO (Salva no Supabase e insere o evento no Google Calendar)
+// 2. ROTA DE CONFIRMAÇÃO (Salva apenas no Supabase)
 router.post('/confirmar', async (req, res) => {
     const { id_site, id_cliente, id_servico, data_hora } = req.body
 
     try {
-        // Busca detalhes para o convite (nome do site, calendário, nome do serviço)
-        const { data: site } = await supabase.from('site').select('*').eq('id_site', id_site).single();
-        const { data: servico } = await supabase.from('servicos').select('*').eq('id_servico', id_servico).single();
-        const { data: cliente } = await supabase.from('clientes_do_site').select('*').eq('id_cliente', id_cliente).single();
-
-        // Calcula horário de fim baseado na duração
         const inicio = new Date(data_hora);
-        const fim = new Date(inicio.getTime() + servico.duracao * 60000);
-
-        // Cria o evento no Google Calendar
-        const resumo = `${servico.nome_servico} - ${cliente.nome_cliente}`;
-        const descricao = `Agendamento realizado via Core Autonomous.\nCliente: ${cliente.nome_cliente}\nE-mail: ${cliente.email_cliente}`;
-        
-        const googleEventId = await criarEventoNoGoogle(
-            site.calendario_id,
-            resumo,
-            descricao,
-            inicio.toISOString(),
-            fim.toISOString()
-        );
 
         // Salva no banco de dados do Supabase
         const { data: agendamento, error } = await supabase
@@ -116,8 +110,7 @@ router.post('/confirmar', async (req, res) => {
                 id_site,
                 id_cliente,
                 id_servico,
-                data_hora: inicio.toISOString(),
-                google_event_id: googleEventId
+                data_hora: inicio.toISOString()
             }])
             .select()
 

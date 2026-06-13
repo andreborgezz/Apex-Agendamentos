@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Apex Agendamentos — Entrar</title>
+  <meta name="description" content="Acesse o painel administrativo do Apex Agendamentos." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* ── LOGIN ESPECÍFICO ─────────────────────────────────── */
+    .auth-page {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: var(--bg);
+    }
+
+    .auth-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-2xl);
+      padding: 48px 44px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: var(--shadow-lg);
+      opacity: 0;
+      transform: translateY(24px);
+    }
+
+    .auth-brand {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+
+    .auth-logo {
+      width: 56px;
+      height: 56px;
+      background: var(--accent);
+      border-radius: var(--r-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      color: var(--text-on-accent);
+      font-size: 1.5rem;
+      box-shadow: 0 8px 20px rgba(0, 113, 227, 0.28);
+    }
+
+    .auth-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+    }
+
+    .auth-subtitle {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+
+    .auth-form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .auth-forgot {
+      text-align: center;
+      font-size: 0.8125rem;
+      color: var(--accent);
+      text-decoration: none;
+      transition: opacity 0.15s;
+    }
+
+    .auth-forgot:hover {
+      opacity: 0.75;
+    }
+
+    @media (max-width: 480px) {
+      .auth-card {
+        padding: 32px 24px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="toast-container" aria-live="polite"></div>
+
+  <main class="auth-page">
+    <div class="auth-card" id="auth-card">
+      <div class="auth-brand">
+        <div class="auth-logo" aria-hidden="true">
+          <i class="ti ti-calendar-bolt"></i>
+        </div>
+        <h1 class="auth-title">Apex Agendamentos</h1>
+        <p class="auth-subtitle">Painel Administrativo</p>
+      </div>
+
+      <form id="form-login" class="auth-form" novalidate aria-label="Formulário de login">
+        <div class="field-group">
+          <label class="field-label" for="input-email">E-mail</label>
+          <div class="field-wrap">
+            <i class="ti ti-mail field-icon" aria-hidden="true"></i>
+            <input id="input-email" class="field-input" type="email" placeholder="seu@email.com" autocomplete="email"
+              required />
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="input-senha">Senha</label>
+          <div class="field-wrap">
+            <i class="ti ti-lock field-icon" aria-hidden="true"></i>
+            <input id="input-senha" class="field-input" type="password" placeholder="••••••••"
+              autocomplete="current-password" required />
+            <button type="button" id="btn-toggle-senha" class="field-action" aria-label="Mostrar senha">
+              <i class="ti ti-eye" aria-hidden="true"></i>
+            </button>
+          </div>
+        </div>
+
+        <button id="btn-login" type="submit" class="btn btn--primary btn--full">
+          <span class="btn-text">Entrar no painel</span>
+          <span class="btn-loading hidden" aria-hidden="true">
+            <i class="ti ti-loader-2 spin"></i>
+          </span>
+        </button>
+
+        <a href="#" class="auth-forgot" id="link-forgot">Esqueceu a senha?</a>
+      </form>
+    </div>
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+  <script type="module" src="index.js"></script>
+</body>
+
+</html>

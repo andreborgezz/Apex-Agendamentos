@@ -44,4 +44,35 @@ router.put('/:id', async (req, res) => {
     res.json(data)
 })
 
-export default router
+// 4. LOGIN - Autenticar o dono do estabelecimento
+router.post('/login', async (req, res) => {
+    const { email_usuario, senha_usuario } = req.body
+
+    if (!email_usuario || !senha_usuario) {
+        return res.status(400).json({ mensagem: 'E-mail e senha são obrigatórios.' })
+    }
+
+    const { data: usuario, error } = await supabase
+        .from('usuarios')
+        .select('id_usuario, nome_usuario, email_usuario, cnpj')
+        .eq('email_usuario', email_usuario)
+        .eq('senha_usuario', senha_usuario)
+        .maybeSingle()
+
+    if (error) return res.status(500).json({ mensagem: 'Erro ao autenticar.' })
+    if (!usuario) return res.status(401).json({ mensagem: 'E-mail ou senha incorretos.' })
+
+    // Busca o site vinculado ao usuário
+    const { data: site } = await supabase
+        .from('site')
+        .select('id_site, nome_site, link')
+        .eq('id_usuario', usuario.id_usuario)
+        .maybeSingle()
+
+    res.json({
+        usuario,
+        site: site || null,
+    })
+})
+
+export default router

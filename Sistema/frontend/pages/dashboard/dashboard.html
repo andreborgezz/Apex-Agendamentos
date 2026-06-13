@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — Apex Agendamentos</title>
+  <meta name="description" content="Visão geral do seu negócio: agendamentos, faturamento e clientes." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+  <link rel="stylesheet" href="../../styles.css" />
+</head>
+<body>
+  <div id="toast-container" aria-live="polite"></div>
+
+  <div class="app-layout">
+    <!-- Sidebar injetada via JS -->
+    <div id="sidebar-root"></div>
+
+    <main class="main-content" id="main-content">
+      <header class="page-header">
+        <div>
+          <h1 class="page-title">Dashboard</h1>
+          <p class="page-desc">Visão geral do seu negócio</p>
+        </div>
+        <div class="page-header-actions">
+          <span class="live-badge">
+            <span class="live-dot" aria-hidden="true"></span>
+            Ao vivo
+          </span>
+          <button id="btn-refresh" class="btn btn--ghost btn--sm" aria-label="Atualizar dados">
+            <i class="ti ti-refresh" aria-hidden="true"></i> Atualizar
+          </button>
+        </div>
+      </header>
+
+      <!-- MÉTRICAS BENTO GRID -->
+      <div class="bento-grid" id="bento-metrics" aria-label="Métricas rápidas">
+        <div class="metric-card skeleton-card" id="metric-hoje">
+          <div class="metric-header">
+            <div class="metric-icon metric-icon--blue" aria-hidden="true">
+              <i class="ti ti-calendar-check"></i>
+            </div>
+            <span class="metric-trend trend--neutral" id="trend-hoje" aria-label="Tendência">
+              <i class="ti ti-minus" aria-hidden="true"></i> —
+            </span>
+          </div>
+          <div class="metric-value" id="val-hoje" aria-live="polite">—</div>
+          <div class="metric-label">Agendamentos Hoje</div>
+          <div class="metric-sub" id="sub-hoje">Carregando...</div>
+        </div>
+
+        <div class="metric-card skeleton-card" id="metric-fat">
+          <div class="metric-header">
+            <div class="metric-icon metric-icon--green" aria-hidden="true">
+              <i class="ti ti-currency-dollar"></i>
+            </div>
+            <span class="metric-trend trend--neutral" id="trend-fat">
+              <i class="ti ti-minus" aria-hidden="true"></i> —
+            </span>
+          </div>
+          <div class="metric-value" id="val-fat" aria-live="polite">—</div>
+          <div class="metric-label">Faturamento Estimado</div>
+          <div class="metric-sub" id="sub-fat">Mês atual</div>
+        </div>
+
+        <div class="metric-card skeleton-card" id="metric-leads">
+          <div class="metric-header">
+            <div class="metric-icon metric-icon--purple" aria-hidden="true">
+              <i class="ti ti-users"></i>
+            </div>
+            <span class="metric-trend trend--neutral" id="trend-leads">
+              <i class="ti ti-minus" aria-hidden="true"></i> —
+            </span>
+          </div>
+          <div class="metric-value" id="val-leads" aria-live="polite">—</div>
+          <div class="metric-label">Novos Clientes</div>
+          <div class="metric-sub" id="sub-leads">Últimos 30 dias</div>
+        </div>
+      </div>
+
+      <!-- TABELA AGENDAMENTOS -->
+      <div class="table-card">
+        <div class="table-card-header">
+          <h2 class="table-title">Agendamentos Confirmados</h2>
+          <div class="table-actions">
+            <div class="search-wrap" role="search">
+              <i class="ti ti-search search-icon" aria-hidden="true"></i>
+              <input
+                id="search-agendamentos"
+                class="search-input"
+                type="search"
+                placeholder="Buscar agendamento..."
+                aria-label="Buscar agendamentos"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="table-wrapper" role="region" aria-label="Lista de agendamentos" tabindex="0">
+          <table class="apex-table" id="tabela-agendamentos">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">Cliente</th>
+                <th scope="col">Serviço</th>
+                <th scope="col">Data &amp; Hora</th>
+                <th scope="col">Status</th>
+                <th scope="col"><span class="sr-only">Ações</span></th>
+              </tr>
+            </thead>
+            <tbody id="tbody-agendamentos">
+              <!-- Skeletons iniciais -->
+              <tr class="skeleton-row"><td colspan="6"><div class="skeleton-line"></div></td></tr>
+              <tr class="skeleton-row"><td colspan="6"><div class="skeleton-line"></div></td></tr>
+              <tr class="skeleton-row"><td colspan="6"><div class="skeleton-line"></div></td></tr>
+              <tr class="skeleton-row"><td colspan="6"><div class="skeleton-line"></div></td></tr>
+              <tr class="skeleton-row"><td colspan="6"><div class="skeleton-line"></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="table-footer">
+          <span class="table-count" id="table-count" aria-live="polite">— registros</span>
+          <nav class="pagination" id="pagination" aria-label="Paginação"></nav>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+  <script type="module" src="dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Agenda — Apex Agendamentos</title>
+  <meta name="description" content="Calendário completo de agendamentos do seu estabelecimento." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+  <link rel="stylesheet" href="../../styles.css" />
+  <style>
+    .agenda-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      gap: 12px;
+    }
+    .mes-nav {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .mes-label {
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: var(--text-primary);
+      min-width: 160px;
+      text-align: center;
+    }
+    .calendario-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      overflow: hidden;
+    }
+    .cal-grid-header {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      background: var(--surface-alt);
+      border-bottom: 1px solid var(--border);
+    }
+    .cal-day-label {
+      padding: 10px;
+      text-align: center;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+    }
+    .cal-cell {
+      min-height: 90px;
+      padding: 8px;
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background 0.1s;
+      position: relative;
+    }
+    .cal-cell:nth-child(7n) { border-right: none; }
+    .cal-cell:hover { background: var(--surface-alt); }
+    .cal-cell.outro-mes { opacity: 0.35; }
+    .cal-cell.hoje .cal-num {
+      background: var(--accent);
+      color: var(--text-on-accent);
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .cal-num {
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+    }
+    .cal-evento {
+      font-size: 0.7rem;
+      font-weight: 500;
+      padding: 2px 5px;
+      border-radius: var(--r-xs);
+      margin-bottom: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .cal-evento--confirmado { background: rgba(52,199,89,0.15); color: var(--success); }
+    .cal-evento--pendente   { background: rgba(255,159,10,0.15); color: var(--warning); }
+  </style>
+</head>
+<body>
+  <div id="toast-container" aria-live="polite"></div>
+  <div class="app-layout">
+    <div id="sidebar-root"></div>
+    <main class="main-content" id="main-content">
+      <header class="page-header">
+        <div>
+          <h1 class="page-title">Agenda</h1>
+          <p class="page-desc">Calendário de agendamentos</p>
+        </div>
+        <div class="page-header-actions">
+          <div class="agenda-header-row">
+            <div class="mes-nav">
+              <button id="btn-mes-prev" class="btn btn--ghost btn--sm" aria-label="Mês anterior">
+                <i class="ti ti-chevron-left" aria-hidden="true"></i>
+              </button>
+              <span class="mes-label" id="mes-label"></span>
+              <button id="btn-mes-next" class="btn btn--ghost btn--sm" aria-label="Próximo mês">
+                <i class="ti ti-chevron-right" aria-hidden="true"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div class="calendario-wrap" id="calendario-wrap">
+        <div class="cal-grid-header">
+          <div class="cal-day-label">Dom</div>
+          <div class="cal-day-label">Seg</div>
+          <div class="cal-day-label">Ter</div>
+          <div class="cal-day-label">Qua</div>
+          <div class="cal-day-label">Qui</div>
+          <div class="cal-day-label">Sex</div>
+          <div class="cal-day-label">Sáb</div>
+        </div>
+        <div class="cal-grid" id="cal-grid">
+          <!-- Gerado pelo JS -->
+        </div>
+      </div>
+    </main>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+  <script type="module" src="agenda.js"></script>
+</body>
+</html>
