@@ -32,7 +32,7 @@ const state = {
 };
 
 /* ── INICIALIZAÇÃO ───────────────────────────────────────── */
-document.addEventListener('DOMContentLoaded', async () => {
+async function init() {
   await injectSidebar('sidebar-root');
 
   state.siteId = Session.getSiteId();
@@ -49,7 +49,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     translateY: [8, 0],
     ...SPRING_ENTRADA,
   });
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
 
 /* ── CARREGAR DADOS ──────────────────────────────────────── */
 async function carregarDados() {
@@ -71,6 +77,7 @@ async function carregarDados() {
         servicos ( nome_servico, preco )
       `)
       .eq('id_site', state.siteId)
+      .not('id_cliente', 'is', null)
       .order('data_hora', { ascending: false });
 
     if (error) throw error;
@@ -96,21 +103,25 @@ async function carregarDados() {
 /* ── MÉTRICAS ────────────────────────────────────────────── */
 function _renderMetricas() {
   const agora = new Date();
-  const hoje  = agora.toDateString();
+  const anoHoje = agora.getFullYear();
+  const mesHoje = agora.getMonth();
+  const diaHoje = agora.getDate();
 
-  /* Agendamentos de hoje */
-  const agendHoje = state.agendamentos.filter(a =>
-    new Date(a.data_hora).toDateString() === hoje && a.status !== 'cancelado'
-  );
+  /* Agendamentos de hoje usando UTC para evitar shift de timezone */
+  const agendHoje = state.agendamentos.filter(a => {
+    if (a.status === 'cancelado') return false;
+    const d = new Date(a.data_hora);
+    return d.getUTCFullYear() === anoHoje && d.getUTCMonth() === mesHoje && d.getUTCDate() === diaHoje;
+  });
 
-  /* Faturamento real do mês — soma dos preços dos serviços confirmados */
+  /* Faturamento real do mês — soma dos preços dos serviços confirmados em UTC */
   const mesAtual = agora.getMonth();
   const anoAtual = agora.getFullYear();
 
   const confirmadosMes = state.agendamentos.filter(a => {
     if (a.status === 'cancelado') return false;
     const d = new Date(a.data_hora);
-    return d.getMonth() === mesAtual && d.getFullYear() === anoAtual;
+    return d.getUTCMonth() === mesAtual && d.getUTCFullYear() === anoAtual;
   });
 
   const fatEstimado = confirmadosMes.reduce((acc, a) => acc + a.preco, 0);
@@ -122,7 +133,7 @@ function _renderMetricas() {
   const confirmadosMesAnt = state.agendamentos.filter(a => {
     if (a.status === 'cancelado') return false;
     const d = new Date(a.data_hora);
-    return d.getMonth() === mesAnterior && d.getFullYear() === anoAnterior;
+    return d.getUTCMonth() === mesAnterior && d.getUTCFullYear() === anoAnterior;
   });
 
   const fatAnterior = confirmadosMesAnt.reduce((acc, a) => acc + a.preco, 0);
@@ -335,6 +346,7 @@ function _formatarData(iso) {
   return new Date(iso).toLocaleDateString('pt-BR', {
     day: '2-digit', month: 'short', year: 'numeric',
     hour: '2-digit', minute: '2-digit',
+    timeZone: 'UTC'
   });
 }
 

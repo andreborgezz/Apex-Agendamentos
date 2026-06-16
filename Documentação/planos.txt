@@ -1,0 +1,169 @@
+================================================================================
+          APEX AGENDAMENTOS — ROADMAP E ESTRATÉGIA ATÉ O DEPLOY
+================================================================================
+
+Este documento serve como guia estratégico e plano de ação detalhado para levar a 
+plataforma Apex Agendamentos ao ar de forma segura, robusta e lucrativa. Ele cobre 
+desde a otimização técnica e locais de hospedagem até a modelagem de negócios, 
+cobranças e segurança.
+
+--------------------------------------------------------------------------------
+1. COMO ENXUGAR O SISTEMA E DEIXAR ELE ROBUSTO (MIST-PROOFING)
+--------------------------------------------------------------------------------
+Para garantir que a plataforma funcione de forma fluida (sem delays visuais ou 
+travamentos), devemos focar em:
+
+* Caching no LocalStorage/SessionStorage:
+  - Cachear dados de configuração do site (cores, layout) e lista de serviços 
+    no localStorage do cliente final para reduzir chamadas ao Supabase.
+  - Atualizar o cache em segundo plano (stale-while-revalidate) para garantir 
+    tempo de carregamento de sub-segundo no agendamento.
+* Validações de Formulários no Frontend:
+  - Bloquear duplos cliques em botões de confirmação para evitar criação de 
+    agendamentos duplicados (debounce/throttle em JS).
+  - Máscaras de telefone nativas e validação de e-mail por Regex robusto.
+* Tratamento centralizado de Erros (Fallback):
+  - Em caso de falha de rede ao tentar carregar horários, exibir uma mensagem 
+    amigável de reconexão automática em vez de travar o fluxo.
+  - Rollbacks automáticos na UI para qualquer operação otimista que falhar 
+    no banco de dados.
+
+--------------------------------------------------------------------------------
+2. HOSPEDAGEM E DEPLOY (OPÇÕES CONFIÁVEIS E GRATUITAS)
+--------------------------------------------------------------------------------
+Como a arquitetura do Apex é composta por um Frontend Estático (HTML/CSS/JS puro) 
+e um Backend em Node.js conectado ao Supabase, a melhor estratégia de deploy é:
+
+* FRONTEND (Estático — Grátis e com CDN global):
+  - Vercel (Recomendado): Excelente suporte, deploys automáticos via Git, CDN 
+    rápido e certificado SSL grátis automático.
+  - Netlify: Alternativa robusta à Vercel com ótimas políticas gratuitas.
+  - GitHub Pages: Simples e gratuito, porém mais limitado em redirecionamentos.
+
+* BACKEND (Servidor Node.js - Nível Grátis / Baixo Custo):
+  - Render.com: Permite rodar o Express gratuitamente no plano "Web Service" 
+    (entra em repouso após inatividade, leva ~50s para acordar na primeira 
+    requisição, mas é ideal para testes/validação).
+  - Railway.app: Oferece créditos gratuitos mensais e não desliga o servidor. 
+    Ideal para produção inicial em planos de baixo custo ($5/mês).
+  - Fly.io: Excelente para rodar containers de forma rápida e grátis se mantido 
+    abaixo do limite de uso.
+
+* BANCO DE DADOS (Supabase):
+  - Manter no plano gratuito do Supabase (limite de 500MB de banco, o que é 
+    mais do que suficiente para os primeiros ~50 clientes ativos).
+
+--------------------------------------------------------------------------------
+3. MÉTODOS DE COBRANÇA E INTEGRAÇÃO DE PAGAMENTOS
+--------------------------------------------------------------------------------
+Existem dois níveis de pagamento a serem gerenciados no sistema:
+
+A) Assinatura do Prestador (O seu cliente paga a você para usar o Apex):
+   - Plataforma recomendada: Asaas ou Stripe.
+   - Como funciona: Quando o prestador se cadastra, ele ganha 7 dias grátis. 
+     Após isso, o painel exibe um bloqueio solicitando o pagamento.
+   - Cobrança: PIX recorrente ou Cartão de Crédito. O webhook do Asaas/Stripe 
+     notifica o seu backend que o pagamento foi compensado, e o backend 
+     atualiza a coluna `status_pagamento = 'ativo'` na tabela `usuarios` no 
+     Supabase.
+
+B) Pagamento do Cliente Final para o Prestador (Opcional):
+   - Se o prestador quiser cobrar um sinal ou o valor integral no agendamento.
+   - Modelo Split de Pagamento (Asaas ou Mercado Pago): O cliente paga na tela 
+     de agendamento. O dinheiro vai para a conta digital do prestador e uma 
+     taxa de comissão (ex: 2%) é transferida automaticamente para a sua conta.
+
+--------------------------------------------------------------------------------
+4. SEPARAÇÃO DE FUNCIONALIDADES POR PLANOS (MONETIZAÇÃO)
+--------------------------------------------------------------------------------
+Para incentivar os prestadores a migrarem para planos pagos mais caros, sugerimos:
+
+* PLANO BASIC (Gratuito / R$ 29,90/mês):
+  - Até 1 funcionário/profissional cadastrado.
+  - Até 5 serviços cadastrados.
+  - Sem personalização de cores avançadas (apenas layouts padrão).
+  - Relatórios básicos de agendamentos no dashboard.
+
+* PLANO PRO (R$ 59,90/mês):
+  - Funcionários e Serviços ilimitados.
+  - Customização completa de marca (logo, cores exclusivas e subdomínio próprio).
+  - Alertas automáticos por e-mail para clientes.
+  - Exportação de dados dos clientes (planilhas).
+
+* PLANO ELITE / ENTERPRISE (R$ 99,90/mês):
+  - Integração com WhatsApp nativo para envio automático de lembretes.
+  - Sincronização em tempo real com o Google Calendar.
+  - Domínio próprio do prestador (ex: agendar.barbeariadopedro.com.br).
+
+--------------------------------------------------------------------------------
+5. CRIAÇÃO DO PAINEL DE SUPER-ADMINISTRADOR (ADMIN DO SISTEMA)
+--------------------------------------------------------------------------------
+Você precisa de uma tela privada para monitorar o andamento da sua plataforma.
+Criação da página `/pages/superadmin/index.html` (com rota protegida):
+
+* Métricas-Chave a Monitorar:
+  - Total de sites ativos na plataforma.
+  - Total de novos usuários cadastrados (últimos 7, 30 dias).
+  - Volume financeiro transacionado (assinaturas ativas vs inadimplentes).
+  - Gráficos de agendamentos diários em toda a plataforma.
+* Ações de Controle:
+  - Botão para ativar/bloquear manualmente um site/usuário.
+  - Opção para estender o período de testes de um cliente parceiro.
+
+--------------------------------------------------------------------------------
+6. SEGURANÇA E PROTEÇÃO DOS DADOS
+--------------------------------------------------------------------------------
+Segurança em banco de dados compartilhado (Multi-Tenant) é o ponto mais crítico:
+
+* Row Level Security (RLS) no Supabase (Obrigatório!):
+  - NUNCA desative o RLS.
+  - Crie políticas onde um usuário autenticado só possa ver/editar registros na 
+    tabela `site` e `servicos` onde o `id_usuario` seja igual ao seu próprio ID 
+    do Supabase auth.uid().
+  - Clientes finais (não logados) só podem visualizar dados públicos do site 
+    específico através do parâmetro `link` da URL (somente leitura).
+* Higienização de Inputs:
+  - Sanitizar dados no backend e no frontend para evitar injeções de scripts 
+    maliciosos (XSS) no nome dos serviços ou clientes.
+* HTTPS obrigatório em todas as conexões.
+
+--------------------------------------------------------------------------------
+7. EVITAR QUEDAS E MANTER ALTA DISPONIBILIDADE (RESILIÊNCIA)
+--------------------------------------------------------------------------------
+Para evitar que o sistema caia e deixe os prestadores na mão em momentos de pico:
+
+* Monitoramento Ativo (Gratuito):
+  - UptimeRobot: Configurar para testar o backend e o frontend a cada 5 minutos. 
+    Ele envia alertas por e-mail se o serviço ficar fora do ar.
+  - Sentry (Plano Gratuito): Monitora erros em tempo real no frontend e backend. 
+    Se um cliente tiver um erro ao agendar, você saberá imediatamente com a 
+    linha exata do código onde ocorreu.
+* Backups Automáticos:
+  - Configurar backups diários no Supabase para evitar perda de dados.
+* Banco de Dados Limpo:
+  - Rotinas para expurgar ou arquivar logs antigos de agendamentos passados para 
+    evitar inchaço desnecessário no banco gratuito.
+
+--------------------------------------------------------------------------------
+8. INTEGRAÇÕES E MELHORIAS FUTURAS
+--------------------------------------------------------------------------------
+Após o primeiro deploy bem-sucedido, adicione estas integrações para agregar 
+muito valor ao seu SaaS:
+
+* 1. Integração com WhatsApp (Lembretes Automáticos):
+     - Usar APIs como Asaas, Z-API ou Evolution API para disparar uma mensagem: 
+       "Olá [Cliente], seu agendamento na [Barbearia] está confirmado para amanhã 
+       às [Horário]."
+     - Mensagens enviadas 24h e 2h antes reduzem o absenteísmo (não comparecimento) 
+       em até 80%!
+* 2. Sincronização com Google Calendar:
+     - Sempre que um cliente agendar na plataforma, o horário é criado 
+       automaticamente no calendário pessoal do Google do prestador.
+* 3. Painel do Profissional (Multi-colaborador):
+     - Permitir que cada barbeiro/profissional da clínica tenha seu próprio login 
+       limitado para ver apenas a sua agenda individual de clientes.
+
+================================================================================
+Com este plano executado, o Apex estará pronto para crescer de forma sustentável 
+e profissional!
+================================================================================

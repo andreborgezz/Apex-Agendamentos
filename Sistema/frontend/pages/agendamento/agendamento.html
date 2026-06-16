@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Agendar Horário — Apex Agendamentos</title>
+  <meta name="description" content="Escolha o serviço, data e horário para agendar seu atendimento." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+  <link rel="stylesheet" href="../../styles.css" />
+  <style>
+    .public-layout {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 16px;
+      background: var(--apex-bg);
+      color: var(--apex-text-primary);
+    }
+    .public-container {
+      width: 100%;
+      max-width: 680px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      opacity: 0;
+    }
+    .store-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px;
+      background: var(--apex-surface);
+      border: 1px solid var(--apex-border);
+      border-radius: var(--r-xl);
+    }
+    .store-logo {
+      width: 56px;
+      height: 56px;
+      border-radius: var(--r-md);
+      background: var(--apex-surface-alt);
+      border: 1px solid var(--apex-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      color: var(--apex-accent);
+      flex-shrink: 0;
+    }
+    .store-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .store-name {
+      font-size: 1.25rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: var(--apex-text-primary);
+    }
+    .store-niche {
+      font-size: 0.8125rem;
+      color: var(--apex-text-secondary);
+    }
+    .step-card {
+      background: var(--apex-surface);
+      border: 1px solid var(--apex-border);
+      border-radius: var(--r-xl);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      position: relative;
+    }
+    .step-number {
+      position: absolute;
+      top: -12px;
+      left: 20px;
+      background: var(--apex-accent);
+      color: var(--apex-text-primary);
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 20px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    .step-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--apex-text-primary);
+      margin-top: 4px;
+    }
+
+    /* Grid de serviços */
+    .services-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .service-option {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px;
+      background: var(--apex-surface-alt);
+      border: 1px solid var(--apex-border);
+      border-radius: var(--r-lg);
+      cursor: pointer;
+      transition: border-color 0.15s, background-color 0.15s;
+    }
+    .service-option:hover {
+      background: var(--apex-surface-hover);
+      border-color: var(--apex-border-focus);
+    }
+    .service-option.selected {
+      border-color: var(--apex-accent);
+      background: var(--apex-accent-subtle);
+    }
+    .service-option-details {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .service-option-name {
+      font-size: 0.9375rem;
+      font-weight: 600;
+      color: var(--apex-text-primary);
+    }
+    .service-option-meta {
+      font-size: 0.8125rem;
+      color: var(--apex-text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .service-option-price {
+      font-size: 1.0625rem;
+      font-weight: 700;
+      color: var(--apex-text-primary);
+      text-align: right;
+    }
+
+    /* Calendário */
+    .calendar-container {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .calendar-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .calendar-nav-btn {
+      background: none;
+      border: none;
+      color: var(--apex-text-primary);
+      cursor: pointer;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.15s;
+    }
+    .calendar-nav-btn:hover {
+      background: var(--apex-surface-hover);
+    }
+    .calendar-label {
+      font-size: 0.875rem;
+      font-weight: 600;
+      font-family: var(--font-mono);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .calendar-weekdays {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      text-align: center;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--apex-text-muted);
+      margin-bottom: 4px;
+    }
+    .calendar-days {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+    }
+    .calendar-day {
+      aspect-ratio: 1;
+      border-radius: var(--r-sm);
+      background: var(--apex-surface-alt);
+      border: 1px solid var(--apex-border);
+      color: var(--apex-text-primary);
+      font-size: 0.875rem;
+      font-family: var(--font-mono);
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+    }
+    .calendar-day:hover:not(:disabled) {
+      background: var(--apex-surface-hover);
+      border-color: var(--apex-border-focus);
+    }
+    .calendar-day.selected {
+      background: var(--apex-accent) !important;
+      border-color: var(--apex-accent) !important;
+      color: var(--apex-bg) !important;
+      font-weight: 700;
+    }
+    .calendar-day:disabled {
+      color: var(--apex-text-muted);
+      opacity: 0.25;
+      cursor: not-allowed;
+      border-color: transparent;
+    }
+    .calendar-day.hoje {
+      border-color: var(--apex-accent);
+      color: var(--apex-accent);
+    }
+
+    /* Slots de Horários */
+    .slots-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(76px, 1fr));
+      gap: 8px;
+    }
+    .slot-btn {
+      padding: 10px 0;
+      background: var(--apex-surface-alt);
+      border: 1px solid var(--apex-border);
+      border-radius: var(--r-md);
+      color: var(--apex-text-primary);
+      font-family: var(--font-mono);
+      font-size: 0.8125rem;
+      font-weight: 500;
+      cursor: pointer;
+      text-align: center;
+      transition: border-color 0.15s, background-color 0.15s;
+    }
+    .slot-btn:hover:not(:disabled) {
+      background: var(--apex-surface-hover);
+      border-color: var(--apex-border-focus);
+    }
+    .slot-btn.selected {
+      background: var(--apex-accent) !important;
+      border-color: var(--apex-accent) !important;
+      color: var(--apex-bg) !important;
+      font-weight: 700;
+    }
+    .slot-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    /* Confirmação */
+    .confirm-form {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .confirm-summary {
+      background: var(--apex-surface-alt);
+      border: 1px solid var(--apex-border);
+      border-radius: var(--r-lg);
+      padding: 16px;
+      font-size: 0.875rem;
+      line-height: 1.5;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .confirm-summary-item {
+      display: flex;
+      justify-content: space-between;
+    }
+    .confirm-summary-label {
+      color: var(--apex-text-secondary);
+    }
+    .confirm-summary-val {
+      font-weight: 500;
+      color: var(--apex-text-primary);
+    }
+
+    /* Sucesso */
+    .success-container {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 48px 24px;
+      background: var(--apex-surface);
+      border: 1px solid var(--apex-border);
+      border-radius: var(--r-xl);
+      gap: 16px;
+      opacity: 0;
+    }
+    .success-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: var(--apex-accent-subtle);
+      color: var(--apex-success);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.25rem;
+      margin-bottom: 8px;
+    }
+    .success-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--apex-text-primary);
+    }
+    .success-desc {
+      font-size: 0.875rem;
+      color: var(--apex-text-secondary);
+      line-height: 1.5;
+      max-width: 320px;
+    }
+
+    /* Footer */
+    .public-footer {
+      margin-top: auto;
+      padding-top: 40px;
+      font-size: 0.75rem;
+      color: var(--apex-text-muted);
+      text-align: center;
+      letter-spacing: 0.02em;
+    }
+  </style>
+</head>
+<body>
+  <div id="toast-container" aria-live="polite"></div>
+
+  <div class="public-layout">
+    <!-- Container do Fluxo -->
+    <div class="public-container" id="fluxo-container">
+      
+      <!-- Cabeçalho do Estabelecimento -->
+      <header class="store-header">
+        <div class="store-logo" id="store-logo" aria-hidden="true">
+          <i class="ti ti-calendar-bolt"></i>
+        </div>
+        <div class="store-info">
+          <h1 class="store-name" id="store-name">...</h1>
+          <span class="store-niche" id="store-niche">...</span>
+        </div>
+      </header>
+
+      <!-- Passo 1: Selecionar Serviço -->
+      <section class="step-card" id="step-servico">
+        <span class="step-number" aria-hidden="true">Passo 1</span>
+        <h2 class="step-title">Escolha o Serviço</h2>
+        
+        <div class="services-list" id="services-list">
+          <!-- Skeletons -->
+          <div class="skeleton" style="height: 60px; border-radius: var(--r-lg);"></div>
+          <div class="skeleton" style="height: 60px; border-radius: var(--r-lg);"></div>
+        </div>
+      </section>
+
+      <!-- Passo 2: Selecionar Data e Horário -->
+      <section class="step-card" id="step-data-hora">
+        <span class="step-number" aria-hidden="true">Passo 2</span>
+        <h2 class="step-title">Escolha a Data e Horário</h2>
+
+        <div class="calendar-container">
+          <div class="calendar-header">
+            <button id="btn-cal-prev" class="calendar-nav-btn" aria-label="Mês anterior">
+              <i class="ti ti-chevron-left" aria-hidden="true"></i>
+            </button>
+            <span class="calendar-label" id="calendar-label">...</span>
+            <button id="btn-cal-next" class="calendar-nav-btn" aria-label="Próximo mês">
+              <i class="ti ti-chevron-right" aria-hidden="true"></i>
+            </button>
+          </div>
+          
+          <div class="calendar-weekdays">
+            <span>Dom</span><span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span>
+          </div>
+          
+          <div class="calendar-days" id="calendar-days">
+            <!-- Gerado dinamicamente -->
+          </div>
+        </div>
+
+        <div style="border-top: 1px solid var(--apex-border); padding-top: 16px; margin-top: 8px;">
+          <h3 style="font-size: 0.8125rem; font-weight: 600; text-transform: uppercase; color: var(--apex-text-muted); margin-bottom: 12px; letter-spacing: 0.05em;">
+            Horários Disponíveis
+          </h3>
+          <div class="slots-grid" id="slots-grid">
+            <p style="grid-column: 1/-1; text-align: center; color: var(--apex-text-secondary); font-size: 0.8125rem; padding: 12px;">
+              Selecione uma data para ver os horários.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Passo 3: Identificação e Confirmação -->
+      <section class="step-card" id="step-confirmar">
+        <span class="step-number" aria-hidden="true">Passo 3</span>
+        <h2 class="step-title">Suas Informações</h2>
+
+        <form class="confirm-form" id="confirm-form">
+          <div class="field-group">
+            <label class="field-label" for="c-nome">Nome Completo *</label>
+            <div class="input-wrapper">
+              <i class="ti ti-user input-icon" aria-hidden="true"></i>
+              <input id="c-nome" class="field-input" type="text" placeholder="Como quer ser chamado(a)?" required />
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label" for="c-email">E-mail *</label>
+            <div class="input-wrapper">
+              <i class="ti ti-mail input-icon" aria-hidden="true"></i>
+              <input id="c-email" class="field-input" type="email" placeholder="nome@provedor.com" required />
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label" for="c-telefone">Telefone *</label>
+            <div class="input-wrapper">
+              <i class="ti ti-phone input-icon" aria-hidden="true"></i>
+              <input id="c-telefone" class="field-input" type="tel" placeholder="(11) 99999-9999" required />
+            </div>
+          </div>
+
+          <!-- Resumo -->
+          <div class="confirm-summary">
+            <div class="confirm-summary-item">
+              <span class="confirm-summary-label">Serviço:</span>
+              <span class="confirm-summary-val" id="summary-servico">—</span>
+            </div>
+            <div class="confirm-summary-item">
+              <span class="confirm-summary-label">Data e Hora:</span>
+              <span class="confirm-summary-val" id="summary-data-hora">—</span>
+            </div>
+            <div class="confirm-summary-item" style="border-top: 1px dashed var(--apex-border); padding-top: 8px; margin-top: 4px;">
+              <span class="confirm-summary-label" style="font-weight: 600;">Preço:</span>
+              <span class="confirm-summary-val" id="summary-preco" style="font-size: 1rem; font-weight: 700; color: var(--apex-accent);">R$ 0,00</span>
+            </div>
+          </div>
+
+          <button type="submit" id="btn-confirmar" class="btn btn--primary btn--full" style="height: 48px; font-weight: 600;" disabled>
+            <i class="ti ti-check" aria-hidden="true"></i> Confirmar Agendamento
+          </button>
+        </form>
+      </section>
+
+      <footer class="public-footer">
+        Desenvolvido por Apex Agendamentos · Gestão Profissional
+      </footer>
+    </div>
+
+    <!-- Tela de Sucesso -->
+    <div class="public-container success-container" id="success-container">
+      <div class="success-icon" aria-hidden="true">
+        <i class="ti ti-circle-check"></i>
+      </div>
+      <h2 class="success-title">Agendamento Confirmado!</h2>
+      <p class="success-desc">
+        Seu horário foi reservado com sucesso no estabelecimento <strong id="success-store">...</strong>.
+      </p>
+      
+      <div class="confirm-summary" style="width: 100%; max-width: 360px; text-align: left; margin: 12px 0;">
+        <div class="confirm-summary-item">
+          <span class="confirm-summary-label">Serviço:</span>
+          <span class="confirm-summary-val" id="success-summary-servico">—</span>
+        </div>
+        <div class="confirm-summary-item">
+          <span class="confirm-summary-label">Data e Hora:</span>
+          <span class="confirm-summary-val" id="success-summary-data-hora">—</span>
+        </div>
+      </div>
+
+      <button id="btn-novo-agendamento" class="btn btn--primary" style="margin-top: 16px;">
+        <i class="ti ti-plus" aria-hidden="true"></i> Fazer Outro Agendamento
+      </button>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+  <script type="module" src="agendamento.js"></script>
+</body>
+</html>

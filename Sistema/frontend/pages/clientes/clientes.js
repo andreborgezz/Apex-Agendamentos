@@ -16,12 +16,18 @@ let searchQuery  = '';
 let currentPage  = 1;
 const pageSize   = 10;
 
-document.addEventListener('DOMContentLoaded', async () => {
+async function init() {
   await injectSidebar('sidebar-root');
   await _carregarClientes();
   _setupEventos();
   anime({ targets: '.main-content', opacity: [0,1], translateY: [8,0], ...SPRING_ENTRADA });
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
 
 async function _carregarClientes() {
   const siteId = Session.getSiteId();

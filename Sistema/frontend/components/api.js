@@ -130,4 +130,16 @@ export const API = {
   async confirmarAgendamento(payload) {
     return _req('POST', '/agendamentos/confirmar', payload);
   },
+
+  // ── CLIENTES ──────────────────────────────────────────────
+
+  /** GET /clientes/busca?email=X */
+  async buscarCliente(email) {
+    return _req('GET', `/clientes/busca?email=${encodeURIComponent(email)}`);
+  },
+
+  /** POST /clientes/registrar */
+  async registrarCliente(payload) {
+    return _req('POST', '/clientes/registrar', payload);
+  },
 };

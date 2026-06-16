@@ -96,6 +96,37 @@
     }
     .cal-evento--confirmado { background: rgba(52,199,89,0.15); color: var(--success); }
     .cal-evento--pendente   { background: rgba(255,159,10,0.15); color: var(--warning); }
+
+    /* Modal styles */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 8000;
+      background: rgba(0,0,0,0.3);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .modal-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-xl);
+      padding: 28px;
+      width: 100%;
+      max-width: 440px;
+      box-shadow: var(--shadow-lg);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .modal-titulo {
+      font-size: 1.0625rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--text-primary);
+    }
   </style>
 </head>
 <body>
@@ -139,6 +170,27 @@
       </div>
     </main>
   </div>
+
+  <!-- Modal de Detalhes do Dia -->
+  <div id="modal-dia" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-label="Detalhes do dia">
+    <div class="modal-card" id="modal-dia-card" style="max-width: 480px; max-height: 85vh; display: flex; flex-direction: column; gap: 16px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);padding-bottom:12px;gap:12px">
+        <div style="display:flex;flex-direction:column;gap:2px">
+          <h2 class="modal-titulo" id="modal-dia-titulo" style="font-size: 1.0625rem;">Agendamentos</h2>
+          <button id="btn-bloquear-dia" class="btn btn--ghost btn--sm" style="color:var(--danger);padding:4px 8px;font-size:0.75rem;margin-top:4px;align-self:flex-start">
+            <i class="ti ti-lock" aria-hidden="true"></i> Bloquear Dia
+          </button>
+        </div>
+        <button id="btn-fechar-modal-dia" class="btn-icon" aria-label="Fechar modal">
+          <i class="ti ti-x" aria-hidden="true"></i>
+        </button>
+      </div>
+      <div class="slots-timeline" id="slots-timeline" style="display:flex;flex-direction:column;gap:10px;overflow-y:auto;flex:1;padding-right:4px">
+        <!-- Slots e agendamentos gerados dinamicamente -->
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
   <script type="module" src="agenda.js"></script>
 </body>

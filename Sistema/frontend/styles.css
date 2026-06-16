@@ -56,6 +56,25 @@
 
   /* Layout */
   --sidebar-w: 220px;
+
+  /* Apex Agendamentos Tokens (Tema Escuro do Agendamento Público) */
+  --apex-bg: #0C0C0E;
+  --apex-surface: #111114;
+  --apex-surface-alt: #1A1A1F;
+  --apex-surface-hover: #22222A;
+  --apex-border: rgba(255,255,255,0.07);
+  --apex-border-focus: rgba(255,255,255,0.18);
+  --apex-text-primary: #F0EFE8;
+  --apex-text-secondary: #8A8A96;
+  --apex-text-muted: #52525C;
+  --apex-accent: #5C6AC4;
+  --apex-accent-hover: #6B7AD4;
+  --apex-accent-subtle: rgba(92,106,196,0.12);
+  --apex-success: #2ECC8F;
+  --apex-warning: #F0A050;
+  --apex-danger: #E05252;
+  --apex-info: #5096E0;
+  --font-display: 'DM Sans', sans-serif;
 }
 
 /* ── BASE ─────────────────────────────────────────────────── */
@@ -307,6 +326,7 @@ body {
   flex-direction: column;
   gap: 2px;
   flex: 1;
+  position: relative;
 }
 
 .nav-item {
@@ -326,11 +346,29 @@ body {
   text-align: left;
   text-decoration: none;
   transition: background 0.15s, color 0.15s;
+  position: relative;
+  z-index: 1;
 }
 .nav-item:hover         { background: var(--surface-alt); color: var(--text-primary); }
-.nav-item.active        { background: var(--accent-subtle); color: var(--accent); }
+.nav-item.active        { color: var(--accent); }
 .nav-item--danger       { color: var(--danger) !important; margin-top: 4px; }
 .nav-item--danger:hover { background: rgba(255,59,48,0.08) !important; }
+
+/* Dark Theme overrides */
+body.dark-theme {
+  --bg:              #0C0C0E;
+  --surface:         #111114;
+  --surface-alt:     #1A1A1F;
+  --surface-hover:   #22222A;
+  --border:          rgba(255,255,255,0.07);
+  --border-focus:    rgba(255,255,255,0.18);
+  --text-primary:    #F0EFE8;
+  --text-secondary:  #8A8A96;
+  --text-muted:      #52525C;
+  --shadow-sm:       0 1px 3px rgba(0,0,0,0.4);
+  --shadow-md:       0 4px 12px rgba(0,0,0,0.5);
+  --shadow-lg:       0 12px 32px rgba(0,0,0,0.6);
+}
 
 .nav-icon  { font-size: 1.1rem; }
 .nav-label { flex: 1; }

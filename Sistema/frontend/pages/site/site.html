@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Site — Apex Agendamentos</title>
+  <meta name="description"
+    content="Personalize o site do seu estabelecimento: cores, fontes, horários, serviços e preview." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+  <link rel="stylesheet" href="../../styles.css" />
+  <style>
+    /* ── SPLIT VIEW ───────────────────────────────────────── */
+    .split-view {
+      display: grid;
+      grid-template-columns: 320px 1fr 300px;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .split-col {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .col-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .col-title {
+      font-size: 0.9375rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: var(--text-primary);
+    }
+
+    .col-badge {
+      font-size: 0.6875rem;
+      font-weight: 600;
+      font-family: var(--font-mono);
+      color: var(--accent);
+      background: var(--accent-subtle);
+      padding: 2px 7px;
+      border-radius: 100px;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+    }
+
+    /* ── URL PILL ─────────────────────────────────────────── */
+    .url-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      font-size: 0.8125rem;
+      color: var(--text-secondary);
+      max-width: 320px;
+    }
+
+    .url-pill>i {
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    #url-display {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: var(--text-primary);
+    }
+
+    .url-copy-btn {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      padding: 2px;
+      border-radius: var(--r-xs);
+      transition: color 0.15s;
+    }
+
+    .url-copy-btn:hover {
+      color: var(--accent);
+    }
+
+    /* ── SEÇÃO CONFIG ─────────────────────────────────────── */
+    .config-section {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* ── HORÁRIOS ─────────────────────────────────────────── */
+    .horarios-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .horario-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .horario-row.active {
+      border-color: var(--accent);
+      background: var(--accent-subtle);
+    }
+
+    .horario-check {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--accent);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .horario-dia {
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      min-width: 28px;
+    }
+
+    .horario-times {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex: 1;
+      justify-content: flex-end;
+    }
+
+    .horario-input {
+      padding: 5px 4px;
+      border: 1px solid var(--border);
+      border-radius: var(--r-xs);
+      background: var(--surface);
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      font-size: 0.8125rem;
+      width: 86px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .horario-input:focus {
+      border-color: var(--border-focus);
+    }
+
+    .horario-input:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+      background: var(--surface-alt);
+    }
+
+    .horario-sep {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    /* ── SERVIÇOS ─────────────────────────────────────────── */
+    .servicos-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-height: 80px;
+    }
+
+    /* Formulário inline novo serviço */
+    .novo-servico-form {
+      border: 1.5px dashed var(--accent);
+      border-radius: var(--r-md);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background: var(--accent-subtle);
+    }
+
+    .form-inline-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    .form-row-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .btn-add-servico {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 10px;
+      border: 1.5px dashed var(--border);
+      border-radius: var(--r-md);
+      background: transparent;
+      color: var(--text-secondary);
+      font-family: var(--font);
+      font-size: 0.8125rem;
+      font-weight: 500;
+      cursor: pointer;
+      width: 100%;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+    }
+
+    .btn-add-servico:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-subtle);
+    }
+
+    /* ── DEVICE FRAME ─────────────────────────────────────── */
+    .split-col--preview {
+      align-items: center;
+    }
+
+    .device-frame {
+      width: 100%;
+      max-width: 240px;
+      height: 480px;
+      background: #1a1a1e;
+      border-radius: 38px;
+      padding: 8px;
+      /* Bezel fino */
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.18), 0 0 0 2px #2c2c2e;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .device-notch {
+      position: absolute;
+      top: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 20px;
+      background: #1a1a1e;
+      border-bottom-left-radius: 12px;
+      border-bottom-right-radius: 12px;
+      z-index: 10;
+    }
+
+    .device-screen {
+      width: 100%;
+      flex: 1;
+      background: var(--apex-surface);
+      border-radius: 30px;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .preview-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      gap: 12px;
+      padding: 24px;
+      text-align: center;
+      color: var(--text-muted);
+    }
+
+    .preview-placeholder i {
+      font-size: 2.5rem;
+      opacity: 0.3;
+    }
+
+    .preview-placeholder p {
+      font-size: 0.78rem;
+      line-height: 1.5;
+    }
+
+    .device-home {
+      position: absolute;
+      bottom: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 10px;
+      z-index: 10;
+    }
+
+    /* Preview content */
+    .preview-content {
+      flex: 1;
+      width: 100%;
+      overflow-y: auto;
+      scrollbar-width: none;
+      font-family: var(--font);
+    }
+
+    .preview-content::-webkit-scrollbar {
+      display: none;
+    }
+
+    .preview-header {
+      padding: 18px 14px 12px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    }
+
+    .preview-logo-area {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .preview-logo-circle {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      color: var(--text-on-accent);
+    }
+
+    .preview-biz-name {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.01em;
+    }
+
+    .preview-subtitle {
+      font-size: 0.7rem;
+      color: var(--text-secondary);
+    }
+
+    .preview-section-title {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      padding: 10px 14px 6px;
+    }
+
+    .preview-service-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 14px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+      gap: 6px;
+    }
+
+    .preview-service-name {
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .preview-service-meta {
+      font-size: 0.65rem;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    .preview-service-price {
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+
+    .preview-cta {
+      margin: 10px 14px;
+      padding: 10px;
+      border-radius: var(--r-md);
+      text-align: center;
+      color: var(--text-on-accent);
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .url-pill {
+      max-width: 100%;
+    }
+    }
+
+    /* Duration Presets */
+    .duration-presets {
+      display: flex;
+      gap: 4px;
+      margin-top: 6px;
+      flex-wrap: wrap;
+    }
+
+    .preset-pill {
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      border-radius: var(--r-xs);
+      color: var(--text-secondary);
+      font-size: 0.75rem;
+      font-weight: 500;
+      padding: 5px 8px;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+    }
+
+    .preset-pill:hover {
+      background: var(--surface-hover);
+      color: var(--text-primary);
+    }
+
+    .preset-pill.active {
+      background: var(--accent-subtle);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+  </style>
+</head>
+
+<body>
+  <div id="toast-container" aria-live="polite"></div>
+
+  <div class="app-layout">
+    <div id="sidebar-root"></div>
+
+    <main class="main-content" id="main-content">
+      <header class="page-header">
+        <div>
+          <h1 class="page-title">Site</h1>
+          <p class="page-desc">Personalize o site público do seu estabelecimento</p>
+        </div>
+        <div class="page-header-actions">
+          <div class="url-pill" id="url-pill" aria-label="URL pública do seu site">
+            <i class="ti ti-link" aria-hidden="true"></i>
+            <span id="url-display">apex.com/seu-negocio</span>
+            <button id="btn-copy-url" class="url-copy-btn" aria-label="Copiar link público">
+              <i class="ti ti-copy" aria-hidden="true"></i>
+            </button>
+          </div>
+          <button id="btn-salvar-config" class="btn btn--primary" aria-label="Salvar todas as configurações">
+            <i class="ti ti-device-floppy" aria-hidden="true"></i> Salvar alterações
+          </button>
+        </div>
+      </header>
+
+      <!-- SPLIT VIEW -->
+      <div class="split-view" id="split-view">
+
+        <!-- ── COL ESQUERDA: Aparência ──────────────────── -->
+        <div class="split-col" id="col-dados">
+          <div class="col-header">
+            <h2 class="col-title">Aparência do Site</h2>
+            <span class="col-badge">tabela: site</span>
+          </div>
+
+          <div class="config-section">
+            <div class="field-group">
+              <label class="field-label" for="cfg-cor">Cor Principal</label>
+              <div class="field-wrap field-wrap--color">
+                <i class="ti ti-palette field-icon" aria-hidden="true"></i>
+                <input id="cfg-cor" class="field-input" type="text" placeholder="#0071e3" maxlength="7" />
+                <input id="cfg-cor-picker" class="color-picker" type="color" value="#0071e3"
+                  aria-label="Escolher cor com seletor" />
+              </div>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="cfg-bg-color">Cor de Fundo</label>
+              <div class="field-wrap field-wrap--color">
+                <i class="ti ti-brush field-icon" aria-hidden="true"></i>
+                <input id="cfg-bg-color" class="field-input" type="text" placeholder="#0C0C0E" maxlength="7" />
+                <input id="cfg-bg-color-picker" class="color-picker" type="color" value="#0C0C0E"
+                  aria-label="Escolher cor de fundo com seletor" />
+              </div>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label" for="cfg-font-family">Fonte do Site</label>
+              <div class="field-wrap">
+                <i class="ti ti-typography field-icon" aria-hidden="true"></i>
+                <select id="cfg-font-family" class="field-input"
+                  style="padding-left:36px; -webkit-appearance:none; appearance:none;">
+                  <option value="DM Sans">DM Sans</option>
+                  <option value="Inter">Inter</option>
+                  <option value="Outfit">Outfit</option>
+                  <option value="Montserrat">Montserrat</option>
+                  <option value="JetBrains Mono">JetBrains Mono</option>
+                  <option value="Roboto">Roboto</option>
+                  <option value="Playfair Display">Playfair Display</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- HORÁRIOS -->
+          <div class="col-header" style="margin-top:8px">
+            <h2 class="col-title">Funcionamento</h2>
+            <span class="col-badge">regras_de_horarios</span>
+          </div>
+          <div class="horarios-grid" id="horarios-grid" role="group"
+            aria-label="Horários de funcionamento por dia da semana">
+            <!-- Gerado pelo JS -->
+          </div>
+        </div>
+
+        <!-- ── COL CENTRAL: Serviços ───────────────────── -->
+        <div class="split-col" id="col-servicos">
+          <div class="col-header">
+            <h2 class="col-title">Serviços</h2>
+            <span class="col-badge">tabela: servicos</span>
+          </div>
+
+          <div class="servicos-list" id="servicos-list" aria-label="Lista de serviços cadastrados">
+            <!-- Skeletons -->
+            <div class="servico-skeleton" aria-hidden="true"></div>
+            <div class="servico-skeleton" aria-hidden="true"></div>
+            <div class="servico-skeleton" aria-hidden="true"></div>
+          </div>
+
+          <!-- Form inline -->
+          <div class="novo-servico-form hidden" id="form-novo-servico" role="form"
+            aria-label="Formulário de novo serviço">
+            <div class="form-inline-header">
+              <span>Novo Serviço</span>
+              <button id="btn-fechar-form-servico" class="btn-icon" aria-label="Fechar formulário">
+                <i class="ti ti-x" aria-hidden="true"></i>
+              </button>
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="ns-nome">Nome do serviço *</label>
+              <input id="ns-nome" class="field-input no-icon" type="text" placeholder="Ex: Corte + Barba" required />
+            </div>
+            <div class="form-row-2">
+              <div class="field-group">
+                <label class="field-label" for="ns-preco">Preço (R$)</label>
+                <input id="ns-preco" class="field-input no-icon" type="number" placeholder="0,00" min="0" step="0.01" />
+              </div>
+              <div class="field-group" style="position:relative">
+                <label class="field-label" for="ns-duracao">Duração (min)</label>
+                <input id="ns-duracao" class="field-input no-icon" type="number" placeholder="30" min="5" step="5" />
+                <div class="duration-presets" id="ns-duration-presets">
+                  <button type="button" class="preset-pill" data-value="15">15m</button>
+                  <button type="button" class="preset-pill" data-value="30">30m</button>
+                  <button type="button" class="preset-pill" data-value="45">45m</button>
+                  <button type="button" class="preset-pill" data-value="60">1h</button>
+                  <button type="button" class="preset-pill" data-value="90">1h30</button>
+                </div>
+              </div>
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="ns-desc">Descrição</label>
+              <textarea id="ns-desc" class="field-input field-textarea" placeholder="Descrição opcional..."
+                rows="2"></textarea>
+            </div>
+            <button id="btn-confirmar-servico" class="btn btn--primary btn--full">
+              <i class="ti ti-check" aria-hidden="true"></i> Adicionar serviço
+            </button>
+          </div>
+
+          <button id="btn-novo-servico" class="btn-add-servico" aria-label="Adicionar novo serviço">
+            <i class="ti ti-plus" aria-hidden="true"></i> Novo Serviço
+          </button>
+        </div>
+
+        <!-- ── COL DIREITA: Preview ────────────────────── -->
+        <div class="split-col split-col--preview" id="col-preview">
+          <div class="col-header" style="width:100%">
+            <h2 class="col-title">Preview ao Vivo</h2>
+            <button id="btn-play-preview" class="btn btn--primary btn--sm"
+              aria-label="Renderizar preview da página do cliente">
+              <i class="ti ti-player-play-filled" aria-hidden="true"></i> Renderizar
+            </button>
+          </div>
+
+          <div class="device-frame" aria-label="Simulador de dispositivo mobile" role="img">
+            <div class="device-notch" aria-hidden="true"></div>
+            <div class="device-screen" id="device-screen">
+              <div class="preview-placeholder">
+                <i class="ti ti-device-mobile" aria-hidden="true"></i>
+                <p>Clique em <strong>Renderizar</strong> para visualizar a página do cliente ao vivo</p>
+              </div>
+            </div>
+            <div class="device-home" aria-hidden="true"></div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+  <script type="module" src="site.js"></script>
+</body>
+
+</html>

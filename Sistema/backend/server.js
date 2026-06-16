@@ -6,6 +6,8 @@ import usuariosRoutes from './routes/usuarios.js'
 import sitesRoutes from './routes/sites.js'
 import servicosRoutes from './routes/servicos.js'
 import agendamentosRoutes from './routes/agendamentos.js'
+import clientesRoutes from './routes/clientes.js'
+import tiposRoutes from './routes/tipos.js'
 
 dotenv.config()
 
@@ -36,6 +38,8 @@ app.use('/usuarios', usuariosRoutes)
 app.use('/site', sitesRoutes)
 app.use('/servicos', servicosRoutes)
 app.use('/agendamentos', agendamentosRoutes)
+app.use('/clientes', clientesRoutes)
+app.use('/tipos', tiposRoutes)
 
 // Verifica se as variáveis foram carregadas para não dar erro de conexão
 if (!supabaseUrl || !supabaseKey) {

@@ -39,6 +39,8 @@
     .modal-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-xl); padding: 28px; width: 100%; max-width: 440px; box-shadow: var(--shadow-lg); display: flex; flex-direction: column; gap: 14px; }
     .modal-titulo { font-size: 1.0625rem; font-weight: 700; letter-spacing: -0.01em; color: var(--text-primary); }
     .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+
   </style>
 </head>
 <body>
@@ -85,9 +87,20 @@
           <label class="field-label" for="ms-preco">Preço (R$)</label>
           <input id="ms-preco" class="field-input no-icon" type="number" placeholder="45,00" min="0" step="0.01" />
         </div>
+        <div class="field-group" style="position:relative">
+          <label class="field-label" for="ms-duracao">Duração (min) *</label>
+          <input id="ms-duracao" class="field-input no-icon" type="number" placeholder="30" min="5" step="5" required />
+
+        </div>
+      </div>
+      <div class="form-row-2">
         <div class="field-group">
-          <label class="field-label" for="ms-duracao">Duração (min)</label>
-          <input id="ms-duracao" class="field-input no-icon" type="number" placeholder="30" min="5" step="5" />
+          <label class="field-label" for="ms-desconto-pct">Desconto (%)</label>
+          <input id="ms-desconto-pct" class="field-input no-icon" type="number" placeholder="Ex: 15" min="0" max="100" />
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="ms-desconto-ate">Válido até</label>
+          <input id="ms-desconto-ate" class="field-input no-icon" type="date" style="padding-left:12px" />
         </div>
       </div>
       <div class="field-group">
