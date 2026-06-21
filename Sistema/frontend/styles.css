@@ -355,7 +355,7 @@ body {
 .nav-item--danger:hover { background: rgba(255,59,48,0.08) !important; }
 
 /* Dark Theme overrides */
-body.dark-theme {
+html.dark-theme {
   --bg:              #0C0C0E;
   --surface:         #111114;
   --surface-alt:     #1A1A1F;

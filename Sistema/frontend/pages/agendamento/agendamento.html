@@ -106,6 +106,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 12px;
       padding: 16px;
       background: var(--apex-surface-alt);
       border: 1px solid var(--apex-border);
@@ -125,11 +126,16 @@
       display: flex;
       flex-direction: column;
       gap: 4px;
+      flex: 1;
+      min-width: 0;
     }
     .service-option-name {
       font-size: 0.9375rem;
       font-weight: 600;
       color: var(--apex-text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .service-option-meta {
       font-size: 0.8125rem;
@@ -137,12 +143,21 @@
       display: flex;
       align-items: center;
       gap: 6px;
+      overflow: hidden;
+    }
+    .service-option-meta .meta-desc {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      min-width: 0;
     }
     .service-option-price {
       font-size: 1.0625rem;
       font-weight: 700;
       color: var(--apex-text-primary);
       text-align: right;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
 
     /* Calendário */
@@ -338,6 +353,80 @@
       color: var(--apex-text-muted);
       text-align: center;
       letter-spacing: 0.02em;
+    }
+
+    /* ── RESPONSIVO MOBILE ──────────────────────────────────── */
+    @media (max-width: 480px) {
+      .public-layout {
+        padding: 16px 12px;
+        gap: 16px;
+      }
+      .public-container {
+        gap: 16px;
+      }
+      .store-header {
+        padding: 12px;
+        gap: 12px;
+      }
+      .store-logo {
+        width: 48px;
+        height: 48px;
+        font-size: 1.25rem;
+      }
+      .store-name {
+        font-size: 1.1rem;
+      }
+      .step-card {
+        padding: 20px 14px;
+      }
+      .calendar-days {
+        gap: 4px;
+      }
+      .calendar-day {
+        font-size: 0.8125rem;
+        min-height: 38px;
+      }
+      .slots-grid {
+        grid-template-columns: repeat(auto-fill, minmax(66px, 1fr));
+        gap: 6px;
+      }
+      .service-option {
+        padding: 14px 12px;
+      }
+      .confirm-summary {
+        padding: 14px 12px;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .public-layout {
+        padding: 12px 10px;
+      }
+      .store-name {
+        font-size: 1rem;
+      }
+      .store-logo {
+        width: 42px;
+        height: 42px;
+        font-size: 1.1rem;
+      }
+      .step-card {
+        padding: 18px 12px;
+      }
+      .calendar-days {
+        gap: 3px;
+      }
+      .calendar-day {
+        font-size: 0.75rem;
+        min-height: 34px;
+      }
+      .slots-grid {
+        grid-template-columns: repeat(auto-fill, minmax(58px, 1fr));
+        gap: 5px;
+      }
+      .step-title {
+        font-size: 0.9375rem;
+      }
     }
   </style>
 </head>

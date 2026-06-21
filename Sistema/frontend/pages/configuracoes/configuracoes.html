@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,9 +8,12 @@
   <meta name="description" content="Gerencie sua conta, plano, informações fiscais e preferência de tema." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
   <link rel="stylesheet" href="../../styles.css" />
+  <script>if (localStorage.getItem('apex_theme') === 'dark') document.documentElement.classList.add('dark-theme');</script>
   <style>
     .config-grid {
       display: grid;
@@ -17,6 +21,7 @@
       gap: 24px;
       align-items: start;
     }
+
     .config-card {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -27,6 +32,7 @@
       gap: 16px;
       box-shadow: var(--shadow-sm);
     }
+
     .card-header-custom {
       border-bottom: 1px solid var(--border);
       padding-bottom: 12px;
@@ -35,14 +41,17 @@
       align-items: center;
       gap: 8px;
     }
+
     .card-title-custom {
       font-size: 0.95rem;
       font-weight: 600;
       color: var(--text-primary);
     }
+
     .card-title-custom i {
       color: var(--accent);
     }
+
     .plan-badge {
       display: inline-flex;
       align-items: center;
@@ -55,10 +64,12 @@
       color: var(--accent);
       border: 1px solid var(--border-focus);
     }
+
     .theme-options {
       display: flex;
       gap: 12px;
     }
+
     .theme-option {
       flex: 1;
       border: 1px solid var(--border);
@@ -72,22 +83,27 @@
       background: var(--surface-alt);
       transition: border-color 0.15s, background-color 0.15s;
     }
+
     .theme-option:hover {
       background: var(--surface-hover);
       border-color: var(--text-muted);
     }
+
     .theme-option.selected {
       border-color: var(--accent);
       background: var(--accent-subtle);
       color: var(--accent);
     }
+
     .theme-option i {
       font-size: 1.5rem;
     }
+
     .theme-option span {
       font-size: 0.8125rem;
       font-weight: 600;
     }
+
     .logo-preview-box {
       width: 48px;
       height: 48px;
@@ -100,15 +116,18 @@
       overflow: hidden;
       flex-shrink: 0;
     }
+
     .logo-preview-box img {
       width: 100%;
       height: 100%;
       object-fit: cover;
     }
+
     .logo-preview-box i {
       font-size: 1.25rem;
       color: var(--text-muted);
     }
+
     @media (max-width: 768px) {
       .config-grid {
         grid-template-columns: 1fr;
@@ -116,6 +135,7 @@
     }
   </style>
 </head>
+
 <body>
   <div id="toast-container" aria-live="polite"></div>
 
@@ -144,7 +164,7 @@
               <i class="ti ti-building-store" aria-hidden="true"></i>
               <h2 class="card-title-custom">Perfil do Estabelecimento</h2>
             </div>
-            
+
             <div class="field-group">
               <label class="field-label" for="cfg-est-nome">Nome da Barbearia / Local *</label>
               <div class="field-wrap">
@@ -161,7 +181,8 @@
                 </div>
                 <div class="field-wrap" style="flex:1">
                   <i class="ti ti-link field-icon" aria-hidden="true"></i>
-                  <input id="cfg-est-logo" class="field-input" type="url" placeholder="https://exemplo.com/sua-logo.png" />
+                  <input id="cfg-est-logo" class="field-input" type="url"
+                    placeholder="https://exemplo.com/sua-logo.png" />
                 </div>
               </div>
             </div>
@@ -210,24 +231,30 @@
               <label class="field-label" for="cfg-fiscal-cnpj">CPF ou CNPJ</label>
               <div class="field-wrap">
                 <i class="ti ti-id field-icon" aria-hidden="true"></i>
-                <input id="cfg-fiscal-cnpj" class="field-input" type="text" placeholder="00.000.000/0000-00 ou 000.000.000-00" />
+                <input id="cfg-fiscal-cnpj" class="field-input" type="text"
+                  placeholder="00.000.000/0000-00 ou 000.000.000-00" />
               </div>
             </div>
 
             <div class="field-group" style="margin-top:8px">
-              <span class="field-label">Situação da Conta SaaS</span>
+              <span class="field-label">Situação da Conta</span>
               <div style="display:flex; flex-direction:column; gap:10px; margin-top:4px">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
                   <span style="font-size:0.875rem; color:var(--text-secondary)">Plano Atual:</span>
                   <span class="plan-badge"><i class="ti ti-crown"></i> Apex Premium</span>
                 </div>
-                <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px dashed var(--border); padding-top:8px">
+                <div
+                  style="display:flex; justify-content:space-between; align-items:center; border-top:1px dashed var(--border); padding-top:8px">
                   <span style="font-size:0.875rem; color:var(--text-secondary)">Pagamento:</span>
-                  <span style="font-size:0.8125rem; font-weight:600; color:var(--success)"><i class="ti ti-circle-check-filled"></i> Regular (Pago)</span>
+                  <span style="font-size:0.8125rem; font-weight:600; color:var(--success)"><i
+                      class="ti ti-circle-check-filled"></i> Regular (Pago)</span>
                 </div>
-                <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px dashed var(--border); padding-top:8px">
+                <div
+                  style="display:flex; justify-content:space-between; align-items:center; border-top:1px dashed var(--border); padding-top:8px">
                   <span style="font-size:0.875rem; color:var(--text-secondary)">Próxima cobrança:</span>
-                  <span style="font-size:0.8125rem; font-family:var(--font-mono); font-weight:500; color:var(--text-primary)" id="plan-billing-date">16/07/2026</span>
+                  <span
+                    style="font-size:0.8125rem; font-family:var(--font-mono); font-weight:500; color:var(--text-primary)"
+                    id="plan-billing-date">16/07/2026</span>
                 </div>
               </div>
             </div>
@@ -239,12 +266,13 @@
               <i class="ti ti-shield-lock" aria-hidden="true"></i>
               <h2 class="card-title-custom">Segurança & Senha</h2>
             </div>
-            
+
             <div class="field-group">
               <label class="field-label" for="cfg-senha-nova">Nova Senha</label>
               <div class="field-wrap">
                 <i class="ti ti-lock-password field-icon" aria-hidden="true"></i>
-                <input id="cfg-senha-nova" class="field-input" type="password" placeholder="Mínimo 6 caracteres" minlength="6" />
+                <input id="cfg-senha-nova" class="field-input" type="password" placeholder="Mínimo 6 caracteres"
+                  minlength="6" />
               </div>
             </div>
 
@@ -252,7 +280,8 @@
               <label class="field-label" for="cfg-senha-confirma">Confirmar Nova Senha</label>
               <div class="field-wrap">
                 <i class="ti ti-lock-check field-icon" aria-hidden="true"></i>
-                <input id="cfg-senha-confirma" class="field-input" type="password" placeholder="Repita a senha acima" minlength="6" />
+                <input id="cfg-senha-confirma" class="field-input" type="password" placeholder="Repita a senha acima"
+                  minlength="6" />
               </div>
             </div>
           </section>
@@ -264,4 +293,5 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
   <script type="module" src="configuracoes.js"></script>
 </body>
+
 </html>

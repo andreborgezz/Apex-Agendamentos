@@ -1,3 +1,4 @@
 {
-  "livePreview.serverRoot": "Sistema/frontend"
+  "livePreview.serverRoot": "Sistema/frontend",
+  "claudeCode.useTerminal": true
 }

@@ -182,7 +182,7 @@ async function _carregarServicos(idSite) {
           <div class="service-option-meta">
             <i class="ti ti-clock" aria-hidden="true"></i>
             <span>${s.duracao} min</span>
-            ${parsedDesc.texto ? `<span>·</span> <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;">${_esc(parsedDesc.texto)}</span>` : ''}
+            ${parsedDesc.texto ? `<span>·</span> <span class="meta-desc">${_esc(parsedDesc.texto)}</span>` : ''}
           </div>
         </div>
         ${precoHtml}

@@ -35,9 +35,9 @@ async function injectSidebar(rootId = 'sidebar-root') {
   /* Aplicar Tema Salvo no LocalStorage centralizadamente */
   const savedTheme = localStorage.getItem('apex_theme') || 'light';
   if (savedTheme === 'dark') {
-    document.body.classList.add('dark-theme');
+    document.documentElement.classList.add('dark-theme');
   } else {
-    document.body.classList.remove('dark-theme');
+    document.documentElement.classList.remove('dark-theme');
   }
 
   /* Guard de sessão — redireciona ao login se não autenticado */
@@ -172,18 +172,6 @@ async function _navigateTo(href, push = true) {
       // 1. Remove overlays antigos de modais (evitando duplicidade)
       document.querySelectorAll('.modal-overlay').forEach(el => el.remove());
 
-      // 2. Transição de saída do conteúdo
-      await new Promise(resolve => {
-        anime({
-          targets: mainContent,
-          opacity: 0,
-          translateY: -8,
-          duration: 150,
-          easing: 'easeInQuad',
-          complete: resolve
-        });
-      });
-
       // 3. Substituir o conteúdo principal e título
       mainContent.innerHTML = newMain.innerHTML;
       document.title = doc.title || 'Apex Agendamentos';
@@ -234,10 +222,6 @@ async function _navigateTo(href, push = true) {
           }
         }
       }
-
-      // Prepara opacidade 0 para o fade-in do script da própria página
-      mainContent.style.opacity = '0';
-      mainContent.style.transform = 'translateY(8px)';
 
       // 7. Injeta o script correspondente da página para re-bindar eventos e inicializar
       const script = doc.querySelector('script[type="module"]');

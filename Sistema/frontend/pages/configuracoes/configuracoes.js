@@ -33,15 +33,6 @@ async function init() {
 
   // Configura Eventos
   _setupEventos();
-
-  // Entrada animada
-  anime({
-    targets: '.config-card',
-    opacity: [0, 1],
-    translateY: [16, 0],
-    delay: anime.stagger(100),
-    ...SPRING_ENTRADA
-  });
 }
 
 if (document.readyState === 'loading') {
@@ -149,13 +140,13 @@ function _atualizarTemaUI(theme) {
     optLight.classList.remove('selected');
     optDark.setAttribute('aria-checked', 'true');
     optLight.setAttribute('aria-checked', 'false');
-    document.body.classList.add('dark-theme');
+    document.documentElement.classList.add('dark-theme');
   } else {
     optLight.classList.add('selected');
     optDark.classList.remove('selected');
     optLight.setAttribute('aria-checked', 'true');
     optDark.setAttribute('aria-checked', 'false');
-    document.body.classList.remove('dark-theme');
+    document.documentElement.classList.remove('dark-theme');
   }
 }
 

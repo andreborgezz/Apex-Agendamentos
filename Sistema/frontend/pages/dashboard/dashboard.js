@@ -42,13 +42,6 @@ async function init() {
 
   await carregarDados();
   _setupEventos();
-
-  anime({
-    targets: '.main-content',
-    opacity: [0, 1],
-    translateY: [8, 0],
-    ...SPRING_ENTRADA,
-  });
 }
 
 if (document.readyState === 'loading') {

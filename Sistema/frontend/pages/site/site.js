@@ -40,14 +40,6 @@ async function init() {
   _carregarDraft();
   _setupEventos();
   _renderPreview(false);
-
-  anime({
-    targets: ['#col-dados','#col-servicos','#col-preview'],
-    opacity: [0, 1],
-    translateY: [20, 0],
-    delay: anime.stagger(80),
-    ...SPRING_ENTRADA,
-  });
 }
 
 if (document.readyState === 'loading') {
