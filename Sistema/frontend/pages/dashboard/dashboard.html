@@ -4,26 +4,127 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dashboard — Apex Agendamentos</title>
-  <meta name="description" content="Visão geral do seu negócio: agendamentos, faturamento e clientes." />
+  <meta name="description" content="Visão geral do seu negócio: agendamentos, clientes e próximos horários." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
   <link rel="stylesheet" href="../../styles.css" />
   <script>if(localStorage.getItem('apex_theme')==='dark')document.documentElement.classList.add('dark-theme');</script>
+  <style>
+    /* ── PRÓXIMOS AGENDAMENTOS ─────────────────────────────── */
+    .appt-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .appt-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 15px 22px;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.12s;
+    }
+    .appt-item:last-child { border-bottom: none; }
+    .appt-item:hover { background: var(--surface-alt); }
+
+    .appt-time {
+      font-family: var(--font-mono);
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--accent);
+      min-width: 48px;
+      flex-shrink: 0;
+    }
+
+    .appt-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--accent-subtle);
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 0.8125rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .appt-info {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .appt-nome {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .appt-servico {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .appt-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 52px 24px;
+      color: var(--text-muted);
+      text-align: center;
+    }
+    .appt-empty i   { font-size: 2.25rem; opacity: 0.3; }
+    .appt-empty p   { font-size: 0.875rem; }
+
+    /* ── SKELETON: itens da lista ────────────────────────── */
+    .appt-skeleton {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 15px 22px;
+      border-bottom: 1px solid var(--border);
+    }
+    .appt-skeleton:last-child { border-bottom: none; }
+
+    .sk {
+      border-radius: var(--r-xs);
+      background: linear-gradient(90deg, var(--surface-alt) 25%, #e4e4eb 50%, var(--surface-alt) 75%);
+      background-size: 800px 100%;
+      animation: shimmer 1.4s ease-in-out infinite;
+    }
+    .sk-time   { width: 44px;  height: 14px; flex-shrink: 0; }
+    .sk-circle { width: 32px;  height: 32px; border-radius: 50%; flex-shrink: 0; }
+    .sk-info   { display: flex; flex-direction: column; gap: 6px; flex: 1; }
+    .sk-nome   { height: 13px; width: 38%; }
+    .sk-srv    { height: 11px; width: 24%; }
+  </style>
 </head>
 <body>
   <div id="toast-container" aria-live="polite"></div>
 
   <div class="app-layout">
-    <!-- Sidebar injetada via JS -->
     <div id="sidebar-root"></div>
 
     <main class="main-content" id="main-content">
       <header class="page-header">
         <div>
           <h1 class="page-title">Dashboard</h1>
-          <p class="page-desc">Visão geral do seu negócio</p>
+          <p class="page-desc" id="page-date">Visão geral do seu negócio</p>
         </div>
         <div class="page-header-actions">
           <span class="live-badge">
@@ -36,14 +137,15 @@
         </div>
       </header>
 
-      <!-- MÉTRICAS BENTO GRID -->
+      <!-- MÉTRICAS -->
       <div class="bento-grid" id="bento-metrics" aria-label="Métricas rápidas">
+
         <div class="metric-card skeleton-card" id="metric-hoje">
           <div class="metric-header">
             <div class="metric-icon metric-icon--blue" aria-hidden="true">
               <i class="ti ti-calendar-check"></i>
             </div>
-            <span class="metric-trend trend--neutral" id="trend-hoje" aria-label="Tendência">
+            <span class="metric-trend trend--neutral" id="trend-hoje">
               <i class="ti ti-minus" aria-hidden="true"></i> —
             </span>
           </div>
@@ -52,81 +154,75 @@
           <div class="metric-sub" id="sub-hoje">Carregando...</div>
         </div>
 
-        <div class="metric-card skeleton-card" id="metric-fat">
-          <div class="metric-header">
-            <div class="metric-icon metric-icon--green" aria-hidden="true">
-              <i class="ti ti-currency-dollar"></i>
-            </div>
-            <span class="metric-trend trend--neutral" id="trend-fat">
-              <i class="ti ti-minus" aria-hidden="true"></i> —
-            </span>
-          </div>
-          <div class="metric-value" id="val-fat" aria-live="polite">—</div>
-          <div class="metric-label">Faturamento Estimado</div>
-          <div class="metric-sub" id="sub-fat">Mês atual</div>
-        </div>
-
-        <div class="metric-card skeleton-card" id="metric-leads">
+        <div class="metric-card skeleton-card" id="metric-clientes">
           <div class="metric-header">
             <div class="metric-icon metric-icon--purple" aria-hidden="true">
               <i class="ti ti-users"></i>
             </div>
-            <span class="metric-trend trend--neutral" id="trend-leads">
+            <span class="metric-trend trend--neutral" id="trend-clientes">
               <i class="ti ti-minus" aria-hidden="true"></i> —
             </span>
           </div>
-          <div class="metric-value" id="val-leads" aria-live="polite">—</div>
-          <div class="metric-label">Novos Clientes</div>
-          <div class="metric-sub" id="sub-leads">Últimos 30 dias</div>
+          <div class="metric-value" id="val-clientes" aria-live="polite">—</div>
+          <div class="metric-label">Total de Clientes</div>
+          <div class="metric-sub" id="sub-clientes">Carregando...</div>
         </div>
+
+        <div class="metric-card skeleton-card" id="metric-semana">
+          <div class="metric-header">
+            <div class="metric-icon metric-icon--orange" aria-hidden="true">
+              <i class="ti ti-calendar-stats"></i>
+            </div>
+            <span class="metric-trend trend--neutral" id="trend-semana">
+              <i class="ti ti-minus" aria-hidden="true"></i> —
+            </span>
+          </div>
+          <div class="metric-value" id="val-semana" aria-live="polite">—</div>
+          <div class="metric-label">Agendamentos da Semana</div>
+          <div class="metric-sub" id="sub-semana">Carregando...</div>
+        </div>
+
       </div>
 
-      <!-- TABELA AGENDAMENTOS -->
+      <!-- PRÓXIMOS AGENDAMENTOS DO DIA -->
       <div class="table-card">
         <div class="table-card-header">
-          <h2 class="table-title">Agendamentos Confirmados</h2>
-          <div class="table-actions">
-            <div class="search-wrap" role="search">
-              <i class="ti ti-search search-icon" aria-hidden="true"></i>
-              <input
-                id="search-agendamentos"
-                class="search-input"
-                type="search"
-                placeholder="Buscar agendamento..."
-                aria-label="Buscar agendamentos"
-              />
-            </div>
+          <div>
+            <h2 class="table-title">Próximos agendamentos de hoje</h2>
           </div>
+          <span id="appt-badge" class="metric-trend trend--neutral" style="font-size:0.8125rem"></span>
         </div>
 
-        <div class="table-wrapper" role="region" aria-label="Lista de agendamentos" tabindex="0">
-          <table class="apex-table" id="tabela-agendamentos">
-            <thead>
-              <tr>
-                <th scope="col">#</th>
-                <th scope="col">Cliente</th>
-                <th scope="col">Serviço</th>
-                <th scope="col">Data &amp; Hora</th>
-                <th scope="col">Status</th>
-                <th scope="col"><span class="sr-only">Ações</span></th>
-              </tr>
-            </thead>
-            <tbody id="tbody-agendamentos">
-              <!-- Skeletons iniciais -->
-              <tr class="skeleton-row"><td colspan="6"><div class="skeleton-line"></div></td></tr>
-              <tr class="skeleton-row"><td colspan="6"><div class="skeleton-line"></div></td></tr>
-              <tr class="skeleton-row"><td colspan="6"><div class="skeleton-line"></div></td></tr>
-              <tr class="skeleton-row"><td colspan="6"><div class="skeleton-line"></div></td></tr>
-              <tr class="skeleton-row"><td colspan="6"><div class="skeleton-line"></div></td></tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div class="table-footer">
-          <span class="table-count" id="table-count" aria-live="polite">— registros</span>
-          <nav class="pagination" id="pagination" aria-label="Paginação"></nav>
-        </div>
+        <ul id="lista-proximos" class="appt-list" aria-label="Próximos agendamentos do dia" role="list">
+          <!-- Skeletons iniciais -->
+          <li class="appt-skeleton">
+            <div class="sk sk-time"></div>
+            <div class="sk sk-circle"></div>
+            <div class="sk-info"><div class="sk sk-nome"></div><div class="sk sk-srv"></div></div>
+          </li>
+          <li class="appt-skeleton">
+            <div class="sk sk-time"></div>
+            <div class="sk sk-circle"></div>
+            <div class="sk-info"><div class="sk sk-nome"></div><div class="sk sk-srv"></div></div>
+          </li>
+          <li class="appt-skeleton">
+            <div class="sk sk-time"></div>
+            <div class="sk sk-circle"></div>
+            <div class="sk-info"><div class="sk sk-nome"></div><div class="sk sk-srv"></div></div>
+          </li>
+          <li class="appt-skeleton">
+            <div class="sk sk-time"></div>
+            <div class="sk sk-circle"></div>
+            <div class="sk-info"><div class="sk sk-nome"></div><div class="sk sk-srv"></div></div>
+          </li>
+          <li class="appt-skeleton">
+            <div class="sk sk-time"></div>
+            <div class="sk sk-circle"></div>
+            <div class="sk-info"><div class="sk sk-nome"></div><div class="sk sk-srv"></div></div>
+          </li>
+        </ul>
       </div>
+
     </main>
   </div>
 

@@ -21,6 +21,7 @@ let regrasDeFuncionamento = [];
 async function init() {
   await injectSidebar('sidebar-root');
   await _carregarAgendamentos();
+  _renderHoje();
   _renderCalendario();
 
   document.getElementById('btn-mes-prev').addEventListener('click', () => {
@@ -146,6 +147,65 @@ async function _carregarAgendamentos() {
     regrasDeFuncionamento = [];
     Toast.error('Erro ao carregar dados da agenda.');
   }
+}
+
+/* ── SEÇÃO HOJE ──────────────────────────────────────────── */
+function _renderHoje() {
+  const agora = new Date();
+  const ano   = agora.getUTCFullYear();
+  const mes   = agora.getUTCMonth();
+  const dia   = agora.getUTCDate();
+
+  const agendHoje = agendamentos
+    .filter(a => {
+      if (!a.data_hora || !a.clientes_do_site?.nome_cliente) return false;
+      const d = new Date(a.data_hora);
+      return d.getUTCFullYear() === ano && d.getUTCMonth() === mes && d.getUTCDate() === dia;
+    })
+    .sort((a, b) => new Date(a.data_hora) - new Date(b.data_hora));
+
+  const lista = document.getElementById('hoje-lista');
+  const badge = document.getElementById('hoje-badge');
+  lista.innerHTML = '';
+
+  if (!agendHoje.length) {
+    lista.innerHTML = `
+      <li style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:28px 24px;color:var(--text-muted);text-align:center" role="listitem">
+        <i class="ti ti-calendar-off" style="font-size:1.75rem;opacity:0.3" aria-hidden="true"></i>
+        <span style="font-size:0.875rem">Nenhum agendamento para hoje.</span>
+      </li>`;
+    if (badge) {
+      badge.className = 'metric-trend trend--neutral';
+      badge.innerHTML = '<i class="ti ti-minus" aria-hidden="true"></i> Nenhum';
+    }
+    return;
+  }
+
+  if (badge) {
+    badge.className = 'metric-trend trend--up';
+    badge.innerHTML = `<i class="ti ti-calendar-check" aria-hidden="true"></i> ${agendHoje.length} agendamento${agendHoje.length > 1 ? 's' : ''}`;
+  }
+
+  agendHoje.forEach((a, idx) => {
+    const d    = new Date(a.data_hora);
+    const hora = d.getUTCHours().toString().padStart(2, '0') + ':' + d.getUTCMinutes().toString().padStart(2, '0');
+    const nome    = a.clientes_do_site.nome_cliente;
+    const servico = a.servicos?.nome_servico || 'Serviço';
+
+    const li = document.createElement('li');
+    li.className = 'hoje-item';
+    li.setAttribute('role', 'listitem');
+    li.style.opacity = '0';
+    li.innerHTML = `
+      <span class="hoje-hora" aria-label="Horário: ${hora}">${hora}</span>
+      <div class="hoje-avatar" aria-hidden="true">${_esc(nome[0].toUpperCase())}</div>
+      <div class="hoje-info">
+        <span class="hoje-nome">${_esc(nome)}</span>
+        <span class="hoje-servico">${_esc(servico)}</span>
+      </div>`;
+    lista.appendChild(li);
+    anime({ targets: li, opacity: [0, 1], translateX: [-8, 0], delay: idx * 50, ...SPRING_ENTRADA });
+  });
 }
 
 function _renderCalendario(dir) {

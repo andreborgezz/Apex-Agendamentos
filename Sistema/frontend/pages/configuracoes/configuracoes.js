@@ -96,8 +96,7 @@ async function _carregarConfiguracoes() {
 
     if (localState.site) {
       document.getElementById('cfg-est-nome').value = localState.site.nome_site || '';
-      document.getElementById('cfg-est-logo').value = localState.site.logo_loja || '';
-      
+
       // WhatsApp decodificado de layout JSON
       let layoutObj = {};
       try {
@@ -169,11 +168,11 @@ function _setupEventos() {
     anime({ targets: optDark, scale: [0.96, 1], ...SPRING_MICRO });
   });
 
-  // Atualização do Logo Preview em tempo real
-  const logoInput = document.getElementById('cfg-est-logo');
-  logoInput.addEventListener('input', e => {
-    _atualizarLogoPreview(e.target.value.trim());
-    _salvarDraft();
+  // Upload de logo via arquivo
+  document.getElementById('cfg-logo-file').addEventListener('change', e => {
+    const file = e.target.files?.[0];
+    if (file) _uploadLogo(file);
+    e.target.value = ''; // permite selecionar o mesmo arquivo novamente
   });
 
   // Auto-salvar rascunho ao digitar
@@ -185,12 +184,95 @@ function _setupEventos() {
   document.getElementById('btn-salvar-configuracoes').addEventListener('click', _salvarConfiguracoes);
 }
 
+/* ── UPLOAD DE LOGO ──────────────────────────────────────── */
+async function _uploadLogo(file) {
+  if (!file.type.startsWith('image/')) {
+    Toast.warning('Selecione um arquivo de imagem (PNG, JPG, WEBP).');
+    return;
+  }
+  if (file.size > 2 * 1024 * 1024) {
+    Toast.warning('A imagem deve ter no máximo 2 MB.');
+    return;
+  }
+
+  const siteId = Session.getSiteId();
+  if (!siteId) {
+    Toast.error('Nenhum site vinculado. Salve as configurações básicas primeiro.');
+    return;
+  }
+
+  const ext  = file.name.split('.').pop().toLowerCase();
+  const path = `${siteId}/${Date.now()}.${ext}`;
+
+  _setUploadState('uploading');
+
+  try {
+    const { error: upErr } = await supabase.storage
+      .from('logos')
+      .upload(path, file, { upsert: true });
+
+    if (upErr) throw upErr;
+
+    const { data: urlData } = supabase.storage.from('logos').getPublicUrl(path);
+    const publicUrl = urlData.publicUrl;
+
+    const { error: dbErr } = await supabase
+      .from('site')
+      .update({ logo_loja: publicUrl })
+      .eq('id_site', siteId);
+
+    if (dbErr) throw dbErr;
+
+    if (!localState.site) localState.site = {};
+    localState.site.logo_loja = publicUrl;
+
+    const sess = Session.ler() || {};
+    if (sess.site) sess.site.logo_loja = publicUrl;
+    Session.salvar(sess);
+
+    _atualizarLogoPreview(publicUrl);
+    _setUploadState('done');
+    Toast.success('Logo enviado com sucesso!');
+
+  } catch (err) {
+    console.error(err);
+    _setUploadState('idle');
+    Toast.error('Erro ao enviar o logo. Tente novamente.');
+  }
+}
+
+function _setUploadState(st) {
+  const icon   = document.getElementById('logo-upload-icon');
+  const label  = document.getElementById('logo-upload-label');
+  const status = document.getElementById('logo-upload-status');
+  const area   = document.getElementById('logo-upload-area');
+
+  if (st === 'uploading') {
+    if (icon)  icon.className         = 'ti ti-loader-2 spin';
+    if (label) label.textContent       = 'Enviando...';
+    if (area)  area.style.pointerEvents = 'none';
+  } else if (st === 'done') {
+    if (icon)  icon.className         = 'ti ti-circle-check';
+    if (label) label.textContent       = 'Logo enviado!';
+    if (status) status.style.color    = 'var(--success)';
+    if (area)  area.style.pointerEvents = '';
+    setTimeout(() => {
+      if (icon)   icon.className       = 'ti ti-upload';
+      if (label)  label.textContent    = 'Alterar imagem';
+      if (status) status.style.color   = '';
+    }, 2500);
+  } else {
+    if (icon)  icon.className         = 'ti ti-upload';
+    if (label) label.textContent       = 'Escolher imagem...';
+    if (area)  area.style.pointerEvents = '';
+  }
+}
+
 /* ── SALVAR DADOS ────────────────────────────────────────── */
 async function _salvarConfiguracoes() {
-  const nome = document.getElementById('cfg-est-nome').value.trim();
+  const nome    = document.getElementById('cfg-est-nome').value.trim();
   const contato = document.getElementById('cfg-est-contato').value.trim();
-  const logo = document.getElementById('cfg-est-logo').value.trim();
-  const cnpj = document.getElementById('cfg-fiscal-cnpj').value.trim();
+  const cnpj    = document.getElementById('cfg-fiscal-cnpj').value.trim();
   const senhaNova = document.getElementById('cfg-senha-nova').value;
   const senhaConf = document.getElementById('cfg-senha-confirma').value;
 
@@ -253,7 +335,7 @@ async function _salvarConfiguracoes() {
 
     const sitePayload = {
       nome_site: nome,
-      logo_loja: logo || null,
+      logo_loja: localState.site?.logo_loja ?? null,
       layout: JSON.stringify(layoutObj)
     };
 
@@ -300,7 +382,6 @@ async function _salvarConfiguracoes() {
 function _salvarDraft() {
   const draft = {
     nome:    document.getElementById('cfg-est-nome').value,
-    logo:    document.getElementById('cfg-est-logo').value,
     contato: document.getElementById('cfg-est-contato').value,
     cnpj:    document.getElementById('cfg-fiscal-cnpj').value,
   };
@@ -312,11 +393,7 @@ function _carregarDraft() {
     const raw = localStorage.getItem(LS_DRAFT_KEY);
     if (!raw) return;
     const d = JSON.parse(raw);
-    if (d.nome)    document.getElementById('cfg-est-nome').value = d.nome;
-    if (d.logo) {
-      document.getElementById('cfg-est-logo').value = d.logo;
-      _atualizarLogoPreview(d.logo);
-    }
+    if (d.nome)    document.getElementById('cfg-est-nome').value    = d.nome;
     if (d.contato) document.getElementById('cfg-est-contato').value = d.contato;
     if (d.cnpj)    document.getElementById('cfg-fiscal-cnpj').value = d.cnpj;
   } catch (e) {}

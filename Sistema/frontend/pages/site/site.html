@@ -477,11 +477,15 @@
       <!-- SPLIT VIEW -->
       <div class="split-view" id="split-view">
 
-        <!-- ── COL ESQUERDA: Aparência ──────────────────── -->
+        <!-- ── COL ESQUERDA: Aparência + Funcionamento ──── -->
         <div class="split-col" id="col-dados">
+
+          <!-- Seção: Aparência -->
           <div class="col-header">
-            <h2 class="col-title">Aparência do Site</h2>
-            <span class="col-badge">tabela: site</span>
+            <h2 class="col-title">
+              <i class="ti ti-palette" style="margin-right:6px;color:var(--accent);font-size:1rem" aria-hidden="true"></i>
+              Aparência
+            </h2>
           </div>
 
           <div class="config-section">
@@ -523,10 +527,15 @@
             </div>
           </div>
 
-          <!-- HORÁRIOS -->
-          <div class="col-header" style="margin-top:8px">
-            <h2 class="col-title">Funcionamento</h2>
-            <span class="col-badge">regras_de_horarios</span>
+          <!-- Divisor -->
+          <hr style="border:none;border-top:1px solid var(--border);margin:4px 0" aria-hidden="true" />
+
+          <!-- Seção: Funcionamento -->
+          <div class="col-header">
+            <h2 class="col-title">
+              <i class="ti ti-clock" style="margin-right:6px;color:var(--accent);font-size:1rem" aria-hidden="true"></i>
+              Funcionamento
+            </h2>
           </div>
           <div class="horarios-grid" id="horarios-grid" role="group"
             aria-label="Horários de funcionamento por dia da semana">
@@ -538,7 +547,6 @@
         <div class="split-col" id="col-servicos">
           <div class="col-header">
             <h2 class="col-title">Serviços</h2>
-            <span class="col-badge">tabela: servicos</span>
           </div>
 
           <div class="servicos-list" id="servicos-list" aria-label="Lista de serviços cadastrados">
