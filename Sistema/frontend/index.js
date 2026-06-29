@@ -29,9 +29,8 @@ anime({
   ...SPRING_ENTRADA,
 });
 
-/* ── SESSÃO EXISTENTE → REDIRECIONA (só em produção) ─────── */
-const _isDev = ['localhost', '127.0.0.1'].includes(window.location.hostname);
-if (!_isDev && Session.existe()) {
+/* ── SESSÃO EXISTENTE → REDIRECIONA ──────────────────────── */
+if (Session.existe()) {
   window.location.href = 'pages/dashboard/dashboard.html';
 }
 
@@ -98,3 +97,4 @@ form.addEventListener('submit', async (e) => {
     btnLogin.disabled = false;
   }
 });
+

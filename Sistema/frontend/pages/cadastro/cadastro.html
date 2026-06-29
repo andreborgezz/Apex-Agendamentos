@@ -4,18 +4,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Apex Agendamentos — Entrar</title>
-  <meta name="description" content="Acesse o painel administrativo do Apex Agendamentos." />
+  <title>Apex Agendamentos — Criar conta</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
-    rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="../../styles.css" />
   <script>if(localStorage.getItem('apex_theme')==='dark')document.documentElement.classList.add('dark-theme');</script>
   <style>
-    /* ── LOGIN ESPECÍFICO ─────────────────────────────────── */
     .auth-page {
       min-height: 100vh;
       display: flex;
@@ -75,22 +71,38 @@
       gap: 16px;
     }
 
-    .auth-forgot {
+    .auth-footer {
       text-align: center;
       font-size: 0.8125rem;
-      color: var(--accent);
-      text-decoration: none;
-      transition: opacity 0.15s;
+      color: var(--text-secondary);
+      margin-top: 4px;
     }
 
-    .auth-forgot:hover {
-      opacity: 0.75;
+    .auth-footer a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .auth-footer a:hover { opacity: 0.75; }
+
+    .password-strength {
+      height: 3px;
+      border-radius: 2px;
+      background: var(--border);
+      margin-top: -8px;
+      overflow: hidden;
+    }
+
+    .password-strength-bar {
+      height: 100%;
+      width: 0%;
+      border-radius: 2px;
+      transition: width 0.3s ease, background 0.3s ease;
     }
 
     @media (max-width: 480px) {
-      .auth-card {
-        padding: 32px 24px;
-      }
+      .auth-card { padding: 32px 24px; }
     }
   </style>
 </head>
@@ -104,17 +116,24 @@
         <div class="auth-logo" aria-hidden="true">
           <i class="ti ti-calendar-bolt"></i>
         </div>
-        <h1 class="auth-title">Apex Agendamentos</h1>
-        <p class="auth-subtitle">Painel Administrativo</p>
+        <h1 class="auth-title">Criar conta</h1>
+        <p class="auth-subtitle">Comece a gerenciar seus agendamentos</p>
       </div>
 
-      <form id="form-login" class="auth-form" novalidate aria-label="Formulário de login">
+      <form id="form-cadastro" class="auth-form" novalidate>
+        <div class="field-group">
+          <label class="field-label" for="input-nome">Nome completo</label>
+          <div class="field-wrap">
+            <i class="ti ti-user field-icon" aria-hidden="true"></i>
+            <input id="input-nome" class="field-input" type="text" placeholder="Seu nome" autocomplete="name" required />
+          </div>
+        </div>
+
         <div class="field-group">
           <label class="field-label" for="input-email">E-mail</label>
           <div class="field-wrap">
             <i class="ti ti-mail field-icon" aria-hidden="true"></i>
-            <input id="input-email" class="field-input" type="email" placeholder="seu@email.com" autocomplete="email"
-              required />
+            <input id="input-email" class="field-input" type="email" placeholder="seu@email.com" autocomplete="email" required />
           </div>
         </div>
 
@@ -122,32 +141,43 @@
           <label class="field-label" for="input-senha">Senha</label>
           <div class="field-wrap">
             <i class="ti ti-lock field-icon" aria-hidden="true"></i>
-            <input id="input-senha" class="field-input" type="password" placeholder="••••••••"
-              autocomplete="current-password" required />
+            <input id="input-senha" class="field-input" type="password" placeholder="Mínimo 6 caracteres" autocomplete="new-password" required />
             <button type="button" id="btn-toggle-senha" class="field-action" aria-label="Mostrar senha">
+              <i class="ti ti-eye" aria-hidden="true"></i>
+            </button>
+          </div>
+          <div class="password-strength">
+            <div class="password-strength-bar" id="strength-bar"></div>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="input-confirmar">Confirmar senha</label>
+          <div class="field-wrap">
+            <i class="ti ti-lock-check field-icon" aria-hidden="true"></i>
+            <input id="input-confirmar" class="field-input" type="password" placeholder="Repita a senha" autocomplete="new-password" required />
+            <button type="button" id="btn-toggle-confirmar" class="field-action" aria-label="Mostrar senha">
               <i class="ti ti-eye" aria-hidden="true"></i>
             </button>
           </div>
         </div>
 
-        <button id="btn-login" type="submit" class="btn btn--primary btn--full">
-          <span class="btn-text">Entrar no painel</span>
+        <button id="btn-cadastrar" type="submit" class="btn btn--primary btn--full" style="margin-top: 4px;">
+          <span class="btn-text">Criar conta</span>
           <span class="btn-loading hidden" aria-hidden="true">
             <i class="ti ti-loader-2 spin"></i>
           </span>
         </button>
 
-        <a href="#" class="auth-forgot" id="link-forgot">Esqueceu a senha?</a>
-
-        <p style="text-align:center; font-size:0.8125rem; color:var(--text-secondary); margin-top:-4px;">
-          Não tem conta? <a href="pages/cadastro/cadastro.html" style="color:var(--accent); text-decoration:none; font-weight:500;">Criar conta</a>
+        <p class="auth-footer">
+          Já tem conta? <a href="/index.html">Entrar no painel</a>
         </p>
       </form>
     </div>
   </main>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
-  <script type="module" src="index.js"></script>
+  <script type="module" src="cadastro.js"></script>
 </body>
 
 </html>

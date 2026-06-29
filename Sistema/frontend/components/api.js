@@ -1,11 +1,7 @@
 /**
  * components/api.js
  * Centralizador de chamadas à API REST do backend Express.
- * Base URL configurável via localStorage (apex_api_url).
- *
- * Uso:
- *   import { API } from '../../components/api.js';
- *   const { usuario, site } = await API.login(email, senha);
+ * Autenticação via backend bcrypt; sessão em apex_session (localStorage).
  */
 
 const DEFAULT_BASE = 'http://localhost:3333';
@@ -14,10 +10,6 @@ function _base() {
   return localStorage.getItem('apex_api_url') || DEFAULT_BASE;
 }
 
-/**
- * Fetch wrapper com tratamento de erro unificado.
- * Lança Error com a mensagem da API em caso de falha.
- */
 async function _req(method, path, body) {
   const opts = {
     method,
@@ -34,7 +26,7 @@ async function _req(method, path, body) {
   return json;
 }
 
-/* ── SESSÃO (localStorage) ────────────────────────────────── */
+/* ── SESSÃO (localStorage — cache do perfil) ──────────────── */
 const LS_SESSION = 'apex_session';
 
 export const Session = {
@@ -43,13 +35,11 @@ export const Session = {
   limpar()     { localStorage.removeItem(LS_SESSION); },
   existe()     { return !!Session.ler(); },
 
-  /** Retorna o id_site salvo na sessão ou null */
   getSiteId() {
     const s = Session.ler();
     return s?.site?.id_site ?? null;
   },
 
-  /** Retorna o id_usuario salvo na sessão ou null */
   getUsuarioId() {
     const s = Session.ler();
     return s?.usuario?.id_usuario ?? null;
@@ -59,10 +49,9 @@ export const Session = {
 /* ── ENDPOINTS ────────────────────────────────────────────── */
 export const API = {
 
-  /** POST /usuarios/login */
   async login(email_usuario, senha_usuario) {
     const dados = await _req('POST', '/usuarios/login', { email_usuario, senha_usuario });
-    Session.salvar(dados); // { usuario, site }
+    Session.salvar(dados);
     return dados;
   },
 
@@ -70,7 +59,6 @@ export const API = {
     Session.limpar();
   },
 
-  /** POST /usuarios/registrar */
   async registrar(payload) {
     return _req('POST', '/usuarios/registrar', payload);
   },
